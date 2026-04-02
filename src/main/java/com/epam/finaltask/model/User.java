@@ -33,6 +33,6 @@ public class User {
 
     private BigDecimal balance;
 
-    private boolean active;
+    private boolean accountStatus;
     
 }
