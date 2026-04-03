@@ -20,4 +20,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleNoSuchObjectException(EntityNotFoundException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(InsufficientFundsException.class)
+    public ResponseEntity<String> handleInsufficientFundsException(InsufficientFundsException e) {
+        return new ResponseEntity<>("Insufficient funds! You are short by: " + e.getAmount(), HttpStatus.FORBIDDEN);
+    }
+
+
+
 }
