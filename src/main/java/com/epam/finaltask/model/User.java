@@ -33,7 +33,7 @@ public class User {
 
     private BigDecimal balance;
 
-    private boolean accountStatus;
+    private boolean active;
 
     public void addVoucher(Voucher voucher) {
         vouchers.add(voucher);
