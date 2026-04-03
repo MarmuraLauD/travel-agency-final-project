@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService {
 		User user = userMapper.toUser(userDTO);
 		user.setRole(Role.USER);
 		user.setBalance(BigDecimal.ZERO);
-		user.setAccountStatus(true);
+		user.setActive(true);
 		return userMapper.toUserDTO(userRepository.save(user));
 	}
 
@@ -41,7 +41,7 @@ public class UserServiceImpl implements UserService {
 		user.setVouchers(userDTO.getVouchers());
 		user.setPhoneNumber(userDTO.getPhoneNumber());
 		user.setBalance(BigDecimal.valueOf(userDTO.getBalance()));
-		user.setAccountStatus(userDTO.isActive());
+		user.setActive(userDTO.isActive());
 		userRepository.save(user);
 		return userMapper.toUserDTO(user);
 	}
@@ -57,9 +57,9 @@ public class UserServiceImpl implements UserService {
 	public UserDTO changeAccountStatus(UserDTO userDTO) {
 		User user = userRepository.findById(UUID.fromString(userDTO.getId()))
 				.orElseThrow(() -> new EntityNotFoundException("No such ID"));
-		user.setAccountStatus(userDTO.isActive());
-		userRepository.save(user);
-		return userMapper.toUserDTO(user);
+		User mappedUser = userMapper.toUser(userDTO);
+		user.setActive(mappedUser.isActive());
+		return userMapper.toUserDTO(userRepository.save(user));
 	}
 
 	@Override
