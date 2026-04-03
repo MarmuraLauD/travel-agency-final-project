@@ -25,8 +25,11 @@ public class UserServiceImpl implements UserService {
 		if(userRepository.existsByUsername(userDTO.getUsername())) {
 			throw new DuplicateRequestException("Username is already in use");
 		}
-		userRepository.save(userMapper.toUser(userDTO));
-		return userDTO;
+		User user = userMapper.toUser(userDTO);
+		user.setRole(Role.USER);
+		user.setBalance(BigDecimal.ZERO);
+		user.setAccountStatus(true);
+		return userMapper.toUserDTO(userRepository.save(user));
 	}
 
 	@Override
@@ -39,6 +42,7 @@ public class UserServiceImpl implements UserService {
 		user.setPhoneNumber(userDTO.getPhoneNumber());
 		user.setBalance(BigDecimal.valueOf(userDTO.getBalance()));
 		user.setAccountStatus(userDTO.isActive());
+		userRepository.save(user);
 		return userMapper.toUserDTO(user);
 	}
 
@@ -54,12 +58,13 @@ public class UserServiceImpl implements UserService {
 		User user = userRepository.findUserByUsername(userDTO.getUsername())
 				.orElseThrow(() -> new EntityNotFoundException("No such username"));
 		user.setAccountStatus(userDTO.isActive());
+		userRepository.save(user);
 		return userMapper.toUserDTO(user);
 	}
 
 	@Override
 	public UserDTO getUserById(UUID id) {
-		return userMapper.toUserDTO(userRepository.findUserById(id)
+		return userMapper.toUserDTO(userRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("No such ID")));
 	}
 
