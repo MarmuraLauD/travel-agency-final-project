@@ -27,8 +27,10 @@ public class Voucher {
     @Enumerated(EnumType.STRING)
     private TourType tourType;
 
+    @Enumerated(EnumType.STRING)
     private TransferType transferType;
 
+    @Enumerated(EnumType.STRING)
     private HotelType hotelType;
 
     @Enumerated(EnumType.STRING)
@@ -43,6 +45,4 @@ public class Voucher {
     private User user;
 
     private boolean isHot;
-
-
 }
