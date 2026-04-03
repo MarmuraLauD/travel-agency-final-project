@@ -10,5 +10,4 @@ import com.epam.finaltask.model.User;
 public interface UserRepository extends JpaRepository<User, UUID> {
     boolean existsByUsername(String username);
     Optional<User> findUserByUsername(String username);
-    Optional<User> findUserById(UUID id);
 }
