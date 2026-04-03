@@ -34,5 +34,12 @@ public class User {
     private BigDecimal balance;
 
     private boolean accountStatus;
-    
+
+    public void addVoucher(Voucher voucher) {
+        vouchers.add(voucher);
+    }
+
+    public boolean hasVoucher() {
+        return !vouchers.isEmpty();
+    }
 }
