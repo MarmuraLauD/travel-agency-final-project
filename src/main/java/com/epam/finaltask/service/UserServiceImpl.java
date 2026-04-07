@@ -11,6 +11,7 @@ import com.epam.finaltask.model.User;
 import com.epam.finaltask.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,6 +20,7 @@ public class UserServiceImpl implements UserService {
 
 	private final UserMapper userMapper;
 	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
 
 	@Override
 	public UserDTO register(UserDTO userDTO) {
@@ -29,6 +31,7 @@ public class UserServiceImpl implements UserService {
 		user.setRole(Role.USER);
 		user.setBalance(BigDecimal.ZERO);
 		user.setActive(true);
+		user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
 		return userMapper.toUserDTO(userRepository.save(user));
 	}
 
