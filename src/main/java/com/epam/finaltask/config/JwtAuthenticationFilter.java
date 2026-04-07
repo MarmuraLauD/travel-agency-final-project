@@ -8,6 +8,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,10 +27,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserMapper userMapper;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull  FilterChain filterChain)
             throws ServletException, IOException {
         String jwt = null;
-        String username = null;
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
@@ -37,8 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
         if (jwt != null) {
-            username = jwtService.extractUsername(jwt);
-            UserDetails userDetails = userMapper.toUser(userService.getUserByUsername(username));
+            UserDetails userDetails = userMapper.toUser(userService.getUserByUsername(jwtService.extractUsername(jwt)));
             if (userDetails != null && jwtService.isTokenValid(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
