@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,16 +18,18 @@ import java.util.UUID;
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 @Validated
+@EnableMethodSecurity
 public class UserRestController {
 
     private final UserService userService;
 
     @PostMapping("/")
-    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userDTO) {
+    public ResponseEntity<UserDTO> registerUser(@Valid @RequestBody UserDTO userDTO) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(userService.register(userDTO));
     }
 
+    @PreAuthorize("hasAuthority('ADMIN') or authentication.principal.username == #username")
     @PatchMapping("/{username}")
     public ResponseEntity<UserDTO> updateUser(@Valid @PathVariable("username") String username,
                                               @Valid @RequestBody UserDTO userDTO) {
@@ -39,6 +43,7 @@ public class UserRestController {
                 .body(userService.getUserByUsername(username));
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PatchMapping("/{id}/status")
     public ResponseEntity<UserDTO> changeAccountStatus(@Valid @PathVariable("id") String id, @RequestBody UserDTO userDTO) {
         userDTO.setId(id);
