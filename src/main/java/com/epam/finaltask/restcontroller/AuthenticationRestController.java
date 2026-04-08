@@ -37,11 +37,10 @@ public class AuthenticationRestController {
             throw new BadCredentialsException("Bad username or password");
         }
 
-        refreshTokenRepository.save(refreshTokenService.createRefreshToken(userDetails.getUsername()));
+        RefreshToken refreshToken = refreshTokenRepository
+                .save(refreshTokenService.createRefreshToken(userDetails.getUsername()));
         response.setHeader("Authorization", "Bearer " + jwtService.generateToken(userDetails));
-        Cookie refresh = new Cookie("refresh_jwt", refreshTokenRepository.findByUser(userDetails)
-                .orElseThrow(() -> new EntityNotFoundException("Token not found!"))
-                .getToken());
+        Cookie refresh = new Cookie("refresh_jwt", refreshToken.getToken());
         refresh.setHttpOnly(true);
         response.addCookie(refresh);
         return ResponseEntity.ok().build();
@@ -61,6 +60,7 @@ public class AuthenticationRestController {
         refreshTokenRepository.deleteByToken(refreshTokenRepository.findByToken(refreshToken)
                 .orElseThrow(() -> new EntityNotFoundException("Token not found!")));
         response.setHeader("Authorization", "");
+        response.addCookie(new Cookie("refresh_jwt", null));
         return ResponseEntity.ok().build();
     }
 }
