@@ -19,7 +19,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class User implements UserDetails {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     private String username;

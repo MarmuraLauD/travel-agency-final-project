@@ -15,7 +15,7 @@ import lombok.*;
 public class Voucher {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     private String title;
