@@ -23,6 +23,8 @@ public class RefreshToken {
     private Instant expiryDate;
 
     @OneToOne
-    @JoinTable(name = "user_id")
+    @JoinTable(name = "refresh_user",
+            joinColumns = @JoinColumn(name = "refresh_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id"))
     private User user;
 }

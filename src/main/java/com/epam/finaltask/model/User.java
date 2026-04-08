@@ -36,6 +36,9 @@ public class User implements UserDetails {
 
     private BigDecimal balance;
 
+    @OneToOne(mappedBy = "user")
+    private RefreshToken refreshToken;
+
     private boolean active;
 
     public void addVoucher(Voucher voucher) {
