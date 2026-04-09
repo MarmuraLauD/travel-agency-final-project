@@ -41,9 +41,7 @@ public class Voucher {
     private LocalDate evictionDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinTable(name = "user_vouchers",
-            joinColumns = @JoinColumn(name = "voucher_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id"))
+    @JoinColumn(name = "user_id")
     private User user;
 
     private boolean isHot;
