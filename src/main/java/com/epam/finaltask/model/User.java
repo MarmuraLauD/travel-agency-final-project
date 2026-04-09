@@ -29,14 +29,15 @@ public class User implements UserDetails {
 	@Enumerated(EnumType.STRING)
     private Role role;
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "users")
     private List<Voucher> vouchers;
 
     private String phoneNumber;
 
     private BigDecimal balance;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "users")
+
     private RefreshToken refreshToken;
 
     private boolean active;
