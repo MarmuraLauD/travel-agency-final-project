@@ -1,17 +1,27 @@
 package com.epam.finaltask.restcontroller;
 
-import com.epam.finaltask.dto.auth.AuthRequest;
+import com.epam.finaltask.dto.UserDTO;
+import com.epam.finaltask.dto.auth.LoginRequest;
+import com.epam.finaltask.dto.auth.SignUpRequest;
+import com.epam.finaltask.mapper.UserMapper;
 import com.epam.finaltask.model.RefreshToken;
 import com.epam.finaltask.repository.RefreshTokenRepository;
 import com.epam.finaltask.repository.UserRepository;
+import com.epam.finaltask.service.UserService;
 import com.epam.finaltask.service.security.JwtService;
 import com.epam.finaltask.service.security.RefreshTokenService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -27,15 +37,23 @@ public class AuthenticationRestController {
     private final PasswordEncoder passwordEncoder;
     private final RefreshTokenRepository refreshTokenRepository;
     private final RefreshTokenService refreshTokenService;
+    private final UserService userService;
+    private final UserMapper userMapper;
+    private final AuthenticationManager authenticationManager;
 
-    @PostMapping
-    public ResponseEntity<?> login(@RequestBody AuthRequest authRequest, HttpServletResponse response) {
-        UserDetails userDetails = userRepository.findUserByUsername(authRequest.getUsername())
-                .orElseThrow(() -> new EntityNotFoundException("Bad username or password"));
 
-        if (!passwordEncoder.matches(authRequest.getPassword(), userDetails.getPassword())) {
-            throw new BadCredentialsException("Bad username or password");
-        }
+    @PostMapping("/signup")
+    public ResponseEntity<UserDTO> registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(userService.register(userMapper.toUserDTO(signUpRequest)));
+    }
+
+    @PostMapping("/signin")
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
         RefreshToken refreshToken = refreshTokenRepository
                 .save(refreshTokenService.createRefreshToken(userDetails.getUsername()));
