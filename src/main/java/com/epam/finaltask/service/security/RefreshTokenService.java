@@ -36,14 +36,13 @@ public class RefreshTokenService {
 
     public RefreshToken verifyExpiration(RefreshToken token) {
         if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
-            refreshTokenRepository.deleteByToken(token)
-                    .orElseThrow(() -> new EntityNotFoundException("Refresh token was expired. Please make a new sign in request"));
+            refreshTokenRepository.delete(token);
         }
         return token;
     }
 
     @Transactional
-    public void deleteByUserId(Long userId) {
+    public void deleteByUserId(UUID userId) {
         refreshTokenRepository.deleteByUser(userRepository.findById(UUID.fromString(String.valueOf(userId)))
                 .orElseThrow(() -> new EntityNotFoundException("User not found")))
                 .orElseThrow(() -> new EntityNotFoundException("Token not found"));
