@@ -7,6 +7,7 @@ import com.epam.finaltask.service.VoucherService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -20,6 +21,7 @@ public class VoucherRestController {
 
     private final VoucherService voucherService;
 
+    @PreAuthorize("hasAuthority('voucher:create')")
     @PostMapping
     public ResponseEntity<Map<String, String>> createVoucher(@RequestBody VoucherDTO voucherDTO){
         voucherService.create(voucherDTO);
@@ -29,6 +31,7 @@ public class VoucherRestController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PreAuthorize("hasAuthority('voucher:update')")
     @PatchMapping("/{id}")
     public ResponseEntity<Map<String, String>> updateVoucher(@PathVariable("id") String id,
                                                              @RequestBody VoucherDTO voucherDTO){
@@ -40,6 +43,7 @@ public class VoucherRestController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @PreAuthorize("hasAuthority('voucher:delete')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deleteVoucher(@PathVariable("id") String id){
         voucherService.delete(id);
@@ -49,6 +53,7 @@ public class VoucherRestController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @PreAuthorize("hasAuthority('voucher:update')")
     @PatchMapping("/{id}/status")
     public ResponseEntity<Map<String, String>> changeHotStatus(@PathVariable("id") String id,
                                                                @RequestBody VoucherDTO voucherDTO){
@@ -60,12 +65,14 @@ public class VoucherRestController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @PreAuthorize("hasAuthority('voucher:update')")
     @PostMapping("/{id}/order")
     public ResponseEntity<VoucherDTO> order(@PathVariable("id") String id, @RequestParam String userId){
         return ResponseEntity.status(HttpStatus.OK)
                 .body(voucherService.order(id, userId));
     }
 
+    @PreAuthorize("hasAuthority('voucher:read')")
     @GetMapping("/user/{userId}")
     public ResponseEntity<Map<String, Object>> getVouchersByUserId(@PathVariable("userId") String userId) {
         Map<String, Object> response = new HashMap<>();
@@ -73,6 +80,7 @@ public class VoucherRestController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasAuthority('voucher:read')")
     @GetMapping
     public ResponseEntity<Map<String, Object>> getVouchersByParameter(
             @RequestParam(required = false) String tourType,
