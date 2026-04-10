@@ -12,10 +12,12 @@ import com.epam.finaltask.repository.UserRepository;
 import com.epam.finaltask.service.security.RefreshTokenService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -27,6 +29,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserDTO register(UserDTO userDTO) {
+		log.info("Attempting to register a new user with username: {}", userDTO.getUsername());
 		if(userRepository.existsByUsername(userDTO.getUsername())) {
 			throw new DuplicateRequestException("Username is already in use");
 		}
@@ -35,6 +38,7 @@ public class UserServiceImpl implements UserService {
 		user.setBalance(BigDecimal.ZERO);
 		user.setActive(true);
 		user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+		log.info("User {} was successfully registered with role: {}", user.getUsername(), user.getRole());
 		return userMapper.toUserDTO(userRepository.save(user));
 	}
 
@@ -62,10 +66,12 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserDTO changeAccountStatus(UserDTO userDTO) {
+		log.info("Admin is changing account status for user ID: {} to {}", userDTO.getId(), userDTO.isActive());
 		User user = userRepository.findById(UUID.fromString(userDTO.getId()))
 				.orElseThrow(() -> new EntityNotFoundException("No such ID"));
 		User mappedUser = userMapper.toUser(userDTO);
 		user.setActive(mappedUser.isActive());
+		log.info("Account status for user ID: {} successfully updated.", userDTO.getId());
 		return userMapper.toUserDTO(userRepository.save(user));
 	}
 
