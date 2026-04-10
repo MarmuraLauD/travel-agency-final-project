@@ -1,7 +1,10 @@
 package com.epam.finaltask.restcontroller;
 
 import com.epam.finaltask.dto.UserDTO;
+import com.epam.finaltask.repository.UserRepository;
 import com.epam.finaltask.service.UserService;
+import com.epam.finaltask.service.security.RefreshTokenService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
@@ -23,13 +26,14 @@ public class UserRestController {
 
     private final UserService userService;
 
-    @PostMapping("/")
+    @PreAuthorize("hasAuthority('user:create')")
+    @PostMapping
     public ResponseEntity<UserDTO> create(@Valid @RequestBody UserDTO userDTO) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(userService.register(userDTO));
     }
 
-    @PreAuthorize("hasAuthority('ADMIN') or authentication.principal.username == #username")
+    @PreAuthorize("hasAuthority('user:update') or authentication.principal.username == #username")
     @PatchMapping("/{username}")
     public ResponseEntity<UserDTO> updateUser(@Valid @PathVariable("username") String username,
                                               @Valid @RequestBody UserDTO userDTO) {
@@ -37,13 +41,14 @@ public class UserRestController {
                 .body(userService.updateUser(username, userDTO));
     }
 
+    @PreAuthorize("hasAuthority('user:read')")
     @GetMapping("/username/{username}")
     public ResponseEntity<UserDTO> getUserByUsername(@PathVariable("username") @Size(min = 3) String username) {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(userService.getUserByUsername(username));
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('user:update')")
     @PatchMapping("/{id}/status")
     public ResponseEntity<UserDTO> changeAccountStatus(@Valid @PathVariable("id") String id, @RequestBody UserDTO userDTO) {
         userDTO.setId(id);
@@ -51,6 +56,7 @@ public class UserRestController {
                 .body(userService.changeAccountStatus(userDTO));
     }
 
+    @PreAuthorize("hasAuthority('user:read')")
     @GetMapping("/id/{id}")
     public ResponseEntity<UserDTO> getUserById(@Valid @PathVariable("id") String id) {
         return ResponseEntity.status(HttpStatus.OK)
