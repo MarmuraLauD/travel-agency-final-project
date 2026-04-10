@@ -14,6 +14,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,7 +24,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-
+@Slf4j
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -45,9 +46,11 @@ public class AuthenticationRestController {
 
     @PostMapping("/signin")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
+        log.info("Login attempt for user: {}", loginRequest.getUsername());
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        log.info("User {} successfully logged in.", loginRequest.getUsername());
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
         RefreshToken refreshToken = refreshTokenRepository
@@ -70,10 +73,15 @@ public class AuthenticationRestController {
 
     @DeleteMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response, @CookieValue("refresh_jwt") String refreshToken) {
-        refreshTokenRepository.delete(refreshTokenRepository.findByToken(refreshToken)
-                .orElseThrow(() -> new EntityNotFoundException("Token not found!")));
+        RefreshToken refreshToken1 = refreshTokenRepository.findByToken(refreshToken)
+                .orElseThrow(() -> new EntityNotFoundException("Token not found!"));
+        String username = refreshToken1.getUser().getUsername();
+        refreshTokenRepository.delete(refreshToken1);
+        log.info("User {} successfully logged out. Refresh token invalidated.", username);
         response.setHeader("Authorization", "");
-        response.addCookie(new Cookie("refresh_jwt", null));
+        Cookie cookie = new Cookie("refresh_jwt", null);
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
         return ResponseEntity.ok().build();
     }
 }
