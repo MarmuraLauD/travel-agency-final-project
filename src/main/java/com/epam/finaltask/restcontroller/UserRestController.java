@@ -1,10 +1,7 @@
 package com.epam.finaltask.restcontroller;
 
 import com.epam.finaltask.dto.UserDTO;
-import com.epam.finaltask.repository.UserRepository;
 import com.epam.finaltask.service.UserService;
-import com.epam.finaltask.service.security.RefreshTokenService;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
