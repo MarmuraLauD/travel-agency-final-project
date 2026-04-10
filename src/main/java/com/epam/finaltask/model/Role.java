@@ -7,9 +7,10 @@ import java.util.List;
 import java.util.Set;
 
 public enum Role {
-    ADMIN(Set.of(Permission.ADMIN_READ, Permission.ADMIN_DELETE, Permission.ADMIN_UPDATE, Permission.ADMIN_WRITE)),
-    MANAGER(Set.of(Permission.MANAGER_UPDATE)),
-    USER(Set.of(Permission.USER_READ, Permission.USER_DELETE, Permission.USER_UPDATE, Permission.USER_CREATE));
+    ADMIN(Set.of(Permission.USER_READ, Permission.USER_CREATE, Permission.USER_UPDATE, Permission.USER_DELETE,
+            Permission.VOUCHER_CREATE, Permission.VOUCHER_UPDATE, Permission.VOUCHER_DELETE, Permission.VOUCHER_READ)),
+    MANAGER(Set.of(Permission.USER_UPDATE, Permission.VOUCHER_UPDATE,  Permission.VOUCHER_READ,  Permission.USER_READ)),
+    USER(Set.of(Permission.VOUCHER_READ)),;
 
     private final Set<Permission> permissions;
 
