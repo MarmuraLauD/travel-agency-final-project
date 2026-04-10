@@ -50,7 +50,7 @@ public class SecurityConfig {
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
                             response.setStatus(403);
                             response.setContentType("application/json");
-                            response.getWriter().write("{\"error\": \"Forbidden\", \"message\": \"У вас нет прав для этого действия!\"}");
+                            response.getWriter().write("{\"error\": \"Forbidden\", \"message\": \"You don't have enough permission!\"}");
                         })
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
