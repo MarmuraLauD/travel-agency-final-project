@@ -9,10 +9,12 @@ import com.epam.finaltask.mapper.UserMapper;
 import com.epam.finaltask.model.Role;
 import com.epam.finaltask.model.User;
 import com.epam.finaltask.repository.UserRepository;
+import com.epam.finaltask.service.security.RefreshTokenService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +23,7 @@ public class UserServiceImpl implements UserService {
 	private final UserMapper userMapper;
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final RefreshTokenService refreshTokenService;
 
 	@Override
 	public UserDTO register(UserDTO userDTO) {
@@ -50,6 +53,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public UserDTO getUserByUsername(String username) {
 		User user = userRepository.findUserByUsername(username)
 				.orElseThrow(() -> new EntityNotFoundException("No such username"));
@@ -69,6 +73,13 @@ public class UserServiceImpl implements UserService {
 	public UserDTO getUserById(UUID id) {
 		return userMapper.toUserDTO(userRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("No such ID")));
+	}
+
+	@Override
+	public void deleteUserById(UUID id) {
+		refreshTokenService.deleteByUserId(id);
+		userRepository.delete(userRepository.findUserById(id)
+				.orElseThrow(() -> new EntityNotFoundException("User not found with id " + id)));
 	}
 
 }
