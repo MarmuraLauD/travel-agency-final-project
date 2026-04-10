@@ -6,7 +6,6 @@ import com.epam.finaltask.dto.auth.SignUpRequest;
 import com.epam.finaltask.mapper.UserMapper;
 import com.epam.finaltask.model.RefreshToken;
 import com.epam.finaltask.repository.RefreshTokenRepository;
-import com.epam.finaltask.repository.UserRepository;
 import com.epam.finaltask.service.UserService;
 import com.epam.finaltask.service.security.JwtService;
 import com.epam.finaltask.service.security.RefreshTokenService;
@@ -18,12 +17,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -33,8 +30,6 @@ import org.springframework.web.bind.annotation.*;
 public class AuthenticationRestController {
 
     private final JwtService jwtService;
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final RefreshTokenRepository refreshTokenRepository;
     private final RefreshTokenService refreshTokenService;
     private final UserService userService;
@@ -75,7 +70,7 @@ public class AuthenticationRestController {
 
     @DeleteMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response, @CookieValue("refresh_jwt") String refreshToken) {
-        refreshTokenRepository.deleteByToken(refreshTokenRepository.findByToken(refreshToken)
+        refreshTokenRepository.delete(refreshTokenRepository.findByToken(refreshToken)
                 .orElseThrow(() -> new EntityNotFoundException("Token not found!")));
         response.setHeader("Authorization", "");
         response.addCookie(new Cookie("refresh_jwt", null));
