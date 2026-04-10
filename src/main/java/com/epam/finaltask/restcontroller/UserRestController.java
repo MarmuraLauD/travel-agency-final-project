@@ -63,4 +63,10 @@ public class UserRestController {
                 .body(userService.getUserById(UUID.fromString(id)));
     }
 
+    @PreAuthorize("hasAuthority('user:delete')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<UserDTO> deleteUser(@Valid @PathVariable("id") String id) {
+        userService.deleteUserById(UUID.fromString(id));
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }
