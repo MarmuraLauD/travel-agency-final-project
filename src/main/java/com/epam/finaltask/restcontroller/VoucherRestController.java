@@ -33,7 +33,7 @@ public class VoucherRestController {
 
     @PreAuthorize("hasAuthority('voucher:update')")
     @PatchMapping("/{id}")
-    public ResponseEntity<Map<String, String>> updateVoucher(@PathVariable("id") String id,
+    public ResponseEntity<Map<String, String>> updateVoucher(@PathVariable String id,
                                                              @RequestBody VoucherDTO voucherDTO){
         voucherDTO.setId(id);
         voucherService.update(id, voucherDTO);
@@ -45,7 +45,7 @@ public class VoucherRestController {
 
     @PreAuthorize("hasAuthority('voucher:delete')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, String>> deleteVoucher(@PathVariable("id") String id){
+    public ResponseEntity<Map<String, String>> deleteVoucher(@PathVariable String id){
         voucherService.delete(id);
         Map<String, String> response = new HashMap<>();
         response.put("statusCode", "OK");
@@ -55,7 +55,7 @@ public class VoucherRestController {
 
     @PreAuthorize("hasAuthority('voucher:update')")
     @PatchMapping("/{id}/status")
-    public ResponseEntity<Map<String, String>> changeHotStatus(@PathVariable("id") String id,
+    public ResponseEntity<Map<String, String>> changeHotStatus(@PathVariable String id,
                                                                @RequestBody VoucherDTO voucherDTO){
         voucherDTO.setId(id);
         voucherService.changeHotStatus(id, voucherDTO);
@@ -67,14 +67,14 @@ public class VoucherRestController {
 
     @PreAuthorize("hasAuthority('voucher:update')")
     @PostMapping("/{id}/order")
-    public ResponseEntity<VoucherDTO> order(@PathVariable("id") String id, @RequestParam String userId){
+    public ResponseEntity<VoucherDTO> order(@PathVariable String id, @RequestParam String userId){
         return ResponseEntity.status(HttpStatus.OK)
                 .body(voucherService.order(id, userId));
     }
 
     @PreAuthorize("hasAuthority('voucher:read')")
     @GetMapping("/user/{userId}")
-    public ResponseEntity<Map<String, Object>> getVouchersByUserId(@PathVariable("userId") String userId) {
+    public ResponseEntity<Map<String, Object>> getVouchersByUserId(@PathVariable String userId) {
         Map<String, Object> response = new HashMap<>();
         response.put("results", voucherService.findAllByUserId(userId));
         return ResponseEntity.ok(response);
