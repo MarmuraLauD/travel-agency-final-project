@@ -1,4 +1,4 @@
-package com.epam.finaltask.restcontroller;
+package com.epam.finaltask.controller.restcontroller;
 
 import com.epam.finaltask.dto.UserDTO;
 import com.epam.finaltask.service.UserService;
@@ -32,7 +32,7 @@ public class UserRestController {
 
     @PreAuthorize("hasAuthority('user:update') or authentication.principal.username == #username")
     @PatchMapping("/{username}")
-    public ResponseEntity<UserDTO> updateUser(@Valid @PathVariable("username") String username,
+    public ResponseEntity<UserDTO> updateUser(@PathVariable @Valid String username,
                                               @Valid @RequestBody UserDTO userDTO) {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(userService.updateUser(username, userDTO));
@@ -40,14 +40,14 @@ public class UserRestController {
 
     @PreAuthorize("hasAuthority('user:read')")
     @GetMapping("/username/{username}")
-    public ResponseEntity<UserDTO> getUserByUsername(@PathVariable("username") @Size(min = 3) String username) {
+    public ResponseEntity<UserDTO> getUserByUsername(@PathVariable @Size(min = 3) String username) {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(userService.getUserByUsername(username));
     }
 
     @PreAuthorize("hasAuthority('user:update')")
     @PatchMapping("/{id}/status")
-    public ResponseEntity<UserDTO> changeAccountStatus(@Valid @PathVariable("id") String id, @RequestBody UserDTO userDTO) {
+    public ResponseEntity<UserDTO> changeAccountStatus(@PathVariable @Valid String id, @RequestBody UserDTO userDTO) {
         userDTO.setId(id);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(userService.changeAccountStatus(userDTO));
@@ -55,14 +55,14 @@ public class UserRestController {
 
     @PreAuthorize("hasAuthority('user:read')")
     @GetMapping("/id/{id}")
-    public ResponseEntity<UserDTO> getUserById(@Valid @PathVariable("id") String id) {
+    public ResponseEntity<UserDTO> getUserById(@PathVariable @Valid String id) {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(userService.getUserById(UUID.fromString(id)));
     }
 
     @PreAuthorize("hasAuthority('user:delete')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<UserDTO> deleteUser(@Valid @PathVariable("id") String id) {
+    public ResponseEntity<UserDTO> deleteUser(@PathVariable @Valid String id) {
         userService.deleteUserById(UUID.fromString(id));
         return ResponseEntity.status(HttpStatus.OK).build();
     }
