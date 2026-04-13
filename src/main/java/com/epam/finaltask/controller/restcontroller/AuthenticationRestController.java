@@ -55,15 +55,10 @@ public class AuthenticationRestController {
 
         RefreshToken refreshToken = refreshTokenRepository
                 .save(refreshTokenService.createRefreshToken(userDetails.getUsername()));
-        Cookie refresh = new Cookie("refresh_jwt", refreshToken.getToken());
-        Cookie jwt = new Cookie("jwt", jwtService.generateToken(userDetails));
-        response.setHeader("Authorization", "Bearer " + jwt.getValue());
-        refresh.setHttpOnly(true);
-        jwt.setHttpOnly(true);
-        refresh.setPath("/");
-        jwt.setPath("/");
-        response.addCookie(jwt);
-        response.addCookie(refresh);
+        String refresh = refreshToken.getToken();
+        String jwt = jwtService.generateToken(userDetails);
+        setCookie(response, "refresh_jwt", refresh, refreshTokenService.getMaxAgeSeconds());
+        setCookie(response, "jwt", jwt, jwtService.getMaxAgeSeconds());
         return ResponseEntity.ok().build();
     }
 
@@ -72,7 +67,8 @@ public class AuthenticationRestController {
         RefreshToken refresh = refreshTokenRepository.findByToken(refreshToken)
                 .orElseThrow(() -> new EntityNotFoundException("Token not found!"));
         refresh = refreshTokenService.verifyExpiration(refresh);
-        response.addCookie(new Cookie("jwt", jwtService.generateToken(refresh.getUser())));
+        String jwt = jwtService.generateToken(refresh.getUser());
+        setCookie(response, "jwt", jwt, jwtService.getMaxAgeSeconds());
         return ResponseEntity.ok().build();
     }
 
@@ -97,6 +93,14 @@ public class AuthenticationRestController {
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         cookie.setMaxAge(0);
+        response.addCookie(cookie);
+    }
+
+    private void setCookie(HttpServletResponse response, String name, String value,  int maxAge) {
+        Cookie cookie = new Cookie(name, value);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(maxAge);
         response.addCookie(cookie);
     }
 }
