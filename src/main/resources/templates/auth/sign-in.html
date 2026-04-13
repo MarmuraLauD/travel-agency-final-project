@@ -2,29 +2,56 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login Page</title>
-    <!-- Add Bootstrap CSS -->
+    <title>Travel Agency | Login</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 </head>
 <body>
-<div class="container">
-    <h2>Login</h2>
-    <!-- Update the form to include th:action, th:object, and method attributes -->
-    <form th:action="@{/auth/login}" th:object="${loginRequest}" method="post">
-        <div class="form-group">
-            <label for="username">Username</label>
-            <!-- Update input to use th:field for binding -->
-            <input type="text" class="form-control" id="username" th:field="*{username}" placeholder="Enter username" required>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h2 class="mb-4">Login</h2>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" class="form-control" id="username" placeholder="Enter username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" placeholder="Password" required>
+                </div>
+
+                <div id="error-message" class="text-danger mb-3" style="display: none;"></div>
+
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
         </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <!-- Update input to use th:field for binding -->
-            <input type="password" class="form-control" id="password" th:field="*{password}" placeholder="Password" required>
-        </div>
-        <!-- Change the link to a submit button -->
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
+    </div>
 </div>
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+        const errorDiv = document.getElementById('error-message');
+
+        fetch('/api/auth/signin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: user, password: pass })
+        })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = '/dashboard';
+                } else {
+                    errorDiv.style.display = 'block';
+                    errorDiv.innerText = 'Invalid username or password!';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    });
+</script>
 </body>
 </html>
-
