@@ -56,8 +56,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/signup", "/api/auth/signin").permitAll()
-                        .requestMatchers("/api/auth/logout").authenticated()
                         .requestMatchers("/", "/dashboard").permitAll()
+                        .requestMatchers("/api/auth/logout").authenticated()
                         .requestMatchers("/login", "/register").anonymous()
                         .anyRequest().authenticated()
                 )
