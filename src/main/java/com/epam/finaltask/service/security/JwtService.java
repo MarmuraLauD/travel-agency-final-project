@@ -56,4 +56,8 @@ public class JwtService {
         return !isTokenExpired(token) && userDetails.getUsername().equals(extractUsername(token));
     }
 
+    public int getMaxAgeSeconds() {
+        return (int) (jwtExpiration / 1000);
+    }
+
 }

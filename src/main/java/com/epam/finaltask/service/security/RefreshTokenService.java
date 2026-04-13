@@ -48,4 +48,8 @@ public class RefreshTokenService {
                 .orElseThrow(() -> new EntityNotFoundException("Token not found"));
     }
 
+    public int getMaxAgeSeconds() {
+        return (int) (refreshTokenDurationMs / 1000);
+    }
+
 }
