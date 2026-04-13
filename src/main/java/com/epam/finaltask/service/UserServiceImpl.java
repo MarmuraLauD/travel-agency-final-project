@@ -88,4 +88,19 @@ public class UserServiceImpl implements UserService {
 				.orElseThrow(() -> new EntityNotFoundException("User not found with id " + id)));
 	}
 
+	@Override
+	@Transactional
+	public UserDTO changeUserRole(UUID userId, Role newRole) {
+		log.info("Admin is changing role for user ID {} to {}", userId, newRole);
+
+		User user = userRepository.findById(userId)
+				.orElseThrow(() -> new EntityNotFoundException("User not found with id " + userId));
+
+		user.setRole(newRole);
+		User savedUser = userRepository.save(user);
+
+		log.info("User {} role successfully updated to {}", user.getUsername(), newRole);
+		return userMapper.toUserDTO(savedUser);
+	}
+
 }
