@@ -1,6 +1,7 @@
 package com.epam.finaltask.controller.restcontroller;
 
 import com.epam.finaltask.dto.UserDTO;
+import com.epam.finaltask.model.Role;
 import com.epam.finaltask.service.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
@@ -65,5 +66,13 @@ public class UserRestController {
     public ResponseEntity<UserDTO> deleteUser(@PathVariable @Valid String id) {
         userService.deleteUserById(UUID.fromString(id));
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @PreAuthorize("hasAuthority('user:update')")
+    @PatchMapping("/{id}/role")
+    public ResponseEntity<UserDTO> changeUserRole(@PathVariable String id,
+                                                  @RequestParam("role") Role role) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(userService.changeUserRole(UUID.fromString(id), role));
     }
 }
