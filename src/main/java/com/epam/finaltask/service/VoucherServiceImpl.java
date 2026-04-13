@@ -10,6 +10,8 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -102,50 +104,40 @@ public class VoucherServiceImpl implements VoucherService {
     }
 
     @Override
-    public List<VoucherDTO> findAllByUserId(String userId) {
-        return voucherRepository.findAllByUserId(UUID.fromString(userId))
+    public List<VoucherDTO> findAllByUserId(UUID userId) {
+        return voucherRepository.findAllByUserId(UUID.fromString(userId.toString()))
                 .stream()
                 .map(voucherMapper::toVoucherDTO)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override
-    public List<VoucherDTO> findAllByTourType(TourType tourType) {
-        return voucherRepository.findAllByTourType(tourType)
-                .stream()
-                .map(voucherMapper::toVoucherDTO)
-                .collect(Collectors.toCollection(ArrayList::new));
+    public Page<VoucherDTO> findAllByTourType(TourType tourType, Pageable pageable) {
+        return voucherRepository.findAllByTourType(tourType, pageable)
+                .map(voucherMapper::toVoucherDTO);
     }
 
     @Override
-    public List<VoucherDTO> findAllByTransferType(String transferType) {
-        return voucherRepository.findAllByTransferType(TransferType.valueOf(transferType))
-                .stream()
-                .map(voucherMapper::toVoucherDTO)
-                .collect(Collectors.toCollection(ArrayList::new));
+    public Page<VoucherDTO> findAllByTransferType(TransferType transferType, Pageable pageable) {
+        return voucherRepository.findAllByTransferType(transferType, pageable)
+                .map(voucherMapper::toVoucherDTO);
     }
 
     @Override
-    public List<VoucherDTO> findAllByPrice(Double price) {
-        return voucherRepository.findAllByPrice(price)
-                .stream()
-                .map(voucherMapper::toVoucherDTO)
-                .collect(Collectors.toCollection(ArrayList::new));
+    public Page<VoucherDTO> findAllByPrice(Double price, Pageable pageable) {
+        return voucherRepository.findAllByPrice(price, pageable)
+                .map(voucherMapper::toVoucherDTO);
     }
 
     @Override
-    public List<VoucherDTO> findAllByHotelType(HotelType hotelType) {
-        return voucherRepository.findAllByHotelType(hotelType)
-                .stream()
-                .map(voucherMapper::toVoucherDTO)
-                .collect(Collectors.toCollection(ArrayList::new));
+    public Page<VoucherDTO> findAllByHotelType(HotelType hotelType, Pageable pageable) {
+        return voucherRepository.findAllByHotelType(hotelType, pageable)
+                .map(voucherMapper::toVoucherDTO);
     }
 
     @Override
-    public List<VoucherDTO> findAll() {
-        return voucherRepository.findAll()
-                .stream()
-                .map(voucherMapper::toVoucherDTO)
-                .collect(Collectors.toCollection(ArrayList::new));
+    public Page<VoucherDTO> findAll(Pageable pageable) {
+        return voucherRepository.findAll(pageable)
+                .map(voucherMapper::toVoucherDTO);
     }
 }
