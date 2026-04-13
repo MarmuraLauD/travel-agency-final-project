@@ -2,81 +2,107 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Travel Agency | Sign Up</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
+<body class="bg-light">
+
+<div th:replace="~{fragments/navbar :: header}"></div>
+
 <div class="container mt-5">
   <div class="row justify-content-center">
-    <div class="col-md-6">
-      <h2 class="mb-4">Create an Account</h2>
+    <div class="col-md-5">
+      <div class="card shadow border-0">
+        <div class="card-body p-4 p-md-5">
+          <h2 class="text-center fw-bold mb-4">Create Account</h2>
+          <p class="text-center text-muted mb-4">Join our travel community today!</p>
 
-      <form id="registerForm">
-        <div class="form-group">
-          <label for="username">Username</label>
-          <input type="text" class="form-control" id="username" placeholder="3 to 20 characters" required minlength="3" maxlength="20">
+          <form id="registerForm">
+            <div class="mb-3">
+              <label for="username" class="form-label">Username</label>
+              <input type="text" class="form-control" id="username"
+                     placeholder="3 to 20 characters" required minlength="3" maxlength="20">
+              <div class="form-text">Choose a unique name for your profile.</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="phoneNumber" class="form-label">Phone Number</label>
+              <input type="tel" class="form-control" id="phoneNumber"
+                     placeholder="+380..." required>
+            </div>
+
+            <div class="mb-4">
+              <label for="password" class="form-label">Password</label>
+              <input type="password" class="form-control" id="password"
+                     placeholder="At least 6 characters" required minlength="6">
+            </div>
+
+            <div id="error-box" class="alert alert-danger d-none" role="alert"></div>
+            <div id="success-box" class="alert alert-success d-none" role="alert">
+              Registration successful! Redirecting to login page...
+            </div>
+
+            <button type="submit" class="btn btn-warning w-100 fw-bold py-2">Sign Up</button>
+          </form>
+
+          <div class="text-center mt-4">
+            <span class="text-muted">Already have an account?</span>
+            <a th:href="@{/login}" class="text-decoration-none fw-bold ms-1">Sign In</a>
+          </div>
         </div>
+      </div>
 
-        <div class="form-group">
-          <label for="phoneNumber">Phone Number</label>
-          <input type="tel" class="form-control" id="phoneNumber" placeholder="Enter your phone number" required>
-        </div>
-
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" class="form-control" id="password" placeholder="At least 6 characters" required minlength="6">
-        </div>
-
-        <div id="error-message" class="alert alert-danger" style="display: none;"></div>
-        <div id="success-message" class="alert alert-success" style="display: none;">
-          Registration successful! Redirecting to login...
-        </div>
-
-        <button type="submit" class="btn btn-success">Sign Up</button>
-        <a th:href="@{/login}" class="btn btn-link">Already have an account? Login</a>
-      </form>
+      <div class="text-center mt-4 text-muted small">
+        &copy; 2024 Travel Agency Inc. All rights reserved.
+      </div>
     </div>
   </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
   document.getElementById('registerForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
-    const user = document.getElementById('username').value;
-    const pass = document.getElementById('password').value;
-    const phone = document.getElementById('phoneNumber').value;
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const phoneNumber = document.getElementById('phoneNumber').value;
 
-    const errorDiv = document.getElementById('error-message');
-    const successDiv = document.getElementById('success-message');
+    const errorBox = document.getElementById('error-box');
+    const successBox = document.getElementById('success-box');
 
-    errorDiv.style.display = 'none';
+    errorBox.classList.add('d-none');
+    successBox.classList.add('d-none');
 
     fetch('/api/auth/signup', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({
-        username: user,
-        password: pass,
-        phoneNumber: phone
+        username: username,
+        password: password,
+        phoneNumber: phoneNumber
       })
     })
             .then(async response => {
               if (response.ok) {
-                successDiv.style.display = 'block';
+                successBox.classList.remove('d-none');
                 setTimeout(() => {
                   window.location.href = '/login';
-                }, 1500);
+                }, 2000);
               } else {
-                const errText = await response.text();
-                errorDiv.style.display = 'block';
-                errorDiv.innerText = errText || 'Registration failed. Please try again.';
+                const data = await response.json();
+                errorBox.innerText = data.message || 'Registration failed. Try another username.';
+                errorBox.classList.remove('d-none');
               }
             })
             .catch(error => {
               console.error('Error:', error);
-              errorDiv.style.display = 'block';
-              errorDiv.innerText = 'Cannot connect to the server!';
+              errorBox.innerText = 'Server connection error. Please try again later.';
+              errorBox.classList.remove('d-none');
             });
   });
 </script>
