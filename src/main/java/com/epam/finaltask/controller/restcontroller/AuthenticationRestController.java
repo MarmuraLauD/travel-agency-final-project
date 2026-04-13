@@ -60,6 +60,8 @@ public class AuthenticationRestController {
         response.setHeader("Authorization", "Bearer " + jwt.getValue());
         refresh.setHttpOnly(true);
         jwt.setHttpOnly(true);
+        refresh.setPath("/");
+        jwt.setPath("/");
         response.addCookie(jwt);
         response.addCookie(refresh);
         return ResponseEntity.ok().build();
@@ -75,19 +77,26 @@ public class AuthenticationRestController {
     }
 
     @DeleteMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletResponse response, @CookieValue("refresh_jwt") String refreshToken) {
-        RefreshToken refreshToken1 = refreshTokenRepository.findByToken(refreshToken)
-                .orElseThrow(() -> new EntityNotFoundException("Token not found!"));
-        String username = refreshToken1.getUser().getUsername();
-        refreshTokenRepository.delete(refreshToken1);
-        log.info("User {} successfully logged out. Refresh token invalidated.", username);
-        Cookie refresh_cookie = new Cookie("refresh_jwt", null);
-        Cookie jwt_cookie = new Cookie("jwt", null);
+    public ResponseEntity<?> logout(HttpServletResponse response,
+                                    @CookieValue(value = "refresh_jwt", required = false) String refreshToken) {
+        clearCookie(response, "refresh_jwt");
+        clearCookie(response, "jwt");
         response.setHeader("Authorization", "");
-        refresh_cookie.setMaxAge(0);
-        refresh_cookie.setPath("/");
-        jwt_cookie.setMaxAge(0);
-        jwt_cookie.setPath("/");
+
+        if (refreshToken != null) {
+            refreshTokenRepository.findByToken(refreshToken).ifPresent(token -> {
+                log.info("Invalidating token for user: {}", token.getUser().getUsername());
+                refreshTokenRepository.delete(token);
+            });
+        }
         return ResponseEntity.ok().build();
+    }
+
+    private void clearCookie(HttpServletResponse response, String name) {
+        Cookie cookie = new Cookie(name, null);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
     }
 }
