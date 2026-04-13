@@ -1,4 +1,4 @@
-package com.epam.finaltask.restcontroller;
+package com.epam.finaltask.controller.restcontroller;
 
 import com.epam.finaltask.dto.UserDTO;
 import com.epam.finaltask.dto.auth.LoginRequest;
@@ -55,9 +55,12 @@ public class AuthenticationRestController {
 
         RefreshToken refreshToken = refreshTokenRepository
                 .save(refreshTokenService.createRefreshToken(userDetails.getUsername()));
-        response.setHeader("Authorization", "Bearer " + jwtService.generateToken(userDetails));
         Cookie refresh = new Cookie("refresh_jwt", refreshToken.getToken());
+        Cookie jwt = new Cookie("jwt", jwtService.generateToken(userDetails));
+        response.setHeader("Authorization", "Bearer " + jwt.getValue());
         refresh.setHttpOnly(true);
+        jwt.setHttpOnly(true);
+        response.addCookie(jwt);
         response.addCookie(refresh);
         return ResponseEntity.ok().build();
     }
@@ -67,7 +70,7 @@ public class AuthenticationRestController {
         RefreshToken refresh = refreshTokenRepository.findByToken(refreshToken)
                 .orElseThrow(() -> new EntityNotFoundException("Token not found!"));
         refresh = refreshTokenService.verifyExpiration(refresh);
-        response.setHeader("Authorization", "Bearer " + jwtService.generateToken(refresh.getUser()));
+        response.addCookie(new Cookie("jwt", jwtService.generateToken(refresh.getUser())));
         return ResponseEntity.ok().build();
     }
 
@@ -78,10 +81,13 @@ public class AuthenticationRestController {
         String username = refreshToken1.getUser().getUsername();
         refreshTokenRepository.delete(refreshToken1);
         log.info("User {} successfully logged out. Refresh token invalidated.", username);
+        Cookie refresh_cookie = new Cookie("refresh_jwt", null);
+        Cookie jwt_cookie = new Cookie("jwt", null);
         response.setHeader("Authorization", "");
-        Cookie cookie = new Cookie("refresh_jwt", null);
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
+        refresh_cookie.setMaxAge(0);
+        refresh_cookie.setPath("/");
+        jwt_cookie.setMaxAge(0);
+        jwt_cookie.setPath("/");
         return ResponseEntity.ok().build();
     }
 }
