@@ -3,16 +3,21 @@ package com.epam.finaltask.controller.restcontroller;
 import com.epam.finaltask.dto.VoucherDTO;
 import com.epam.finaltask.model.HotelType;
 import com.epam.finaltask.model.TourType;
+import com.epam.finaltask.model.TransferType;
 import com.epam.finaltask.service.VoucherService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/vouchers")
@@ -76,34 +81,48 @@ public class VoucherRestController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<Map<String, Object>> getVouchersByUserId(@PathVariable String userId) {
         Map<String, Object> response = new HashMap<>();
-        response.put("results", voucherService.findAllByUserId(userId));
+        response.put("results", voucherService.findAllByUserId(UUID.fromString(userId)));
         return ResponseEntity.ok(response);
     }
 
     @PreAuthorize("hasAuthority('voucher:read')")
     @GetMapping
     public ResponseEntity<Map<String, Object>> getVouchersByParameter(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id,asc") String[] sort,
             @RequestParam(required = false) String tourType,
             @RequestParam(required = false) String transferType,
             @RequestParam(required = false) String price,
             @RequestParam(required = false) String hotelType) {
 
-        List<VoucherDTO> results;
+        String sortField = sort[0];
+        String sortDirection = sort[1];
+        Sort.Direction direction = sortDirection.equalsIgnoreCase("desc")
+                ? Sort.Direction.DESC : Sort.Direction.ASC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
+
+        Page<VoucherDTO> pageTours;
 
         if (tourType != null) {
-            results = voucherService.findAllByTourType(TourType.valueOf(tourType));
+            pageTours = voucherService.findAllByTourType(TourType.valueOf(tourType), pageable);
         } else if (transferType != null) {
-            results = voucherService.findAllByTransferType(transferType);
+            pageTours = voucherService.findAllByTransferType(TransferType.valueOf(transferType), pageable);
         } else if (price != null) {
-            results = voucherService.findAllByPrice(Double.parseDouble(price));
+            pageTours = voucherService.findAllByPrice(Double.parseDouble(price), pageable);
         } else if (hotelType != null) {
-            results = voucherService.findAllByHotelType(HotelType.valueOf(hotelType));
+            pageTours = voucherService.findAllByHotelType(HotelType.valueOf(hotelType), pageable);
         } else {
-            results = voucherService.findAll();
+            pageTours = voucherService.findAll(pageable);
         }
 
         Map<String, Object> response = new HashMap<>();
-        response.put("results", results);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        response.put("vouchers", pageTours.getContent());
+        response.put("currentPage", pageTours.getNumber());
+        response.put("totalItems", pageTours.getTotalElements());
+        response.put("totalPages", pageTours.getTotalPages());
+
+        return ResponseEntity.ok(response);
     }
 }
