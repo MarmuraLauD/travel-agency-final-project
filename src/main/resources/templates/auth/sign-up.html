@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Travel Agency | Sign Up</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <h2 class="mb-4">Create an Account</h2>
+
+      <form id="registerForm">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" class="form-control" id="username" placeholder="3 to 20 characters" required minlength="3" maxlength="20">
+        </div>
+
+        <div class="form-group">
+          <label for="phoneNumber">Phone Number</label>
+          <input type="tel" class="form-control" id="phoneNumber" placeholder="Enter your phone number" required>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" class="form-control" id="password" placeholder="At least 6 characters" required minlength="6">
+        </div>
+
+        <div id="error-message" class="alert alert-danger" style="display: none;"></div>
+        <div id="success-message" class="alert alert-success" style="display: none;">
+          Registration successful! Redirecting to login...
+        </div>
+
+        <button type="submit" class="btn btn-success">Sign Up</button>
+        <a th:href="@{/login}" class="btn btn-link">Already have an account? Login</a>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('registerForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const user = document.getElementById('username').value;
+    const pass = document.getElementById('password').value;
+    const phone = document.getElementById('phoneNumber').value;
+
+    const errorDiv = document.getElementById('error-message');
+    const successDiv = document.getElementById('success-message');
+
+    errorDiv.style.display = 'none';
+
+    fetch('/api/auth/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: user,
+        password: pass,
+        phoneNumber: phone
+      })
+    })
+            .then(async response => {
+              if (response.ok) {
+                successDiv.style.display = 'block';
+                setTimeout(() => {
+                  window.location.href = '/login';
+                }, 1500);
+              } else {
+                const errText = await response.text();
+                errorDiv.style.display = 'block';
+                errorDiv.innerText = errText || 'Registration failed. Please try again.';
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              errorDiv.style.display = 'block';
+              errorDiv.innerText = 'Cannot connect to the server!';
+            });
+  });
+</script>
+</body>
+</html>
