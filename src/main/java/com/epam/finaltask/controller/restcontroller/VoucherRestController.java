@@ -1,4 +1,4 @@
-package com.epam.finaltask.restcontroller;
+package com.epam.finaltask.controller.restcontroller;
 
 import com.epam.finaltask.dto.VoucherDTO;
 import com.epam.finaltask.model.HotelType;
