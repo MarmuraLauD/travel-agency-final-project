@@ -1,50 +1,105 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Travel Agency | Dashboard</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <style>
+    .sort-link { text-decoration: none; color: inherit; }
+    .pagination-container { margin-top: 20px; }
+  </style>
 </head>
-<body>
+<body class="bg-light">
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-  <div class="container-fluid">
-    <a class="navbar-brand" th:href="@{/}">Travel Agency</a>
-    <div class="d-flex">
-      <span class="navbar-text text-white">Welcome to your Dashboard!</span>
+<div th:replace="~{fragments/navbar :: header}"></div>
+
+<div class="container mt-5">
+  <div class="row mb-4">
+    <div class="col">
+      <h2 class="fw-bold">Available Tour Vouchers</h2>
+      <p class="text-muted">Total vouchers found: <span th:text="${totalItems}">0</span></p>
     </div>
   </div>
-</nav>
 
-<div class="container">
-  <h2 class="mb-4">Available Tours</h2>
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+        <tr>
+          <th>
+            <a class="sort-link" th:href="@{/dashboard(page=${currentPage}, size=5, sortField='id', sortDir=${reverseSortDir})}">
+              #ID <i th:if="${sortField == 'id'}" th:class="${sortDir == 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'}"></i>
+            </a>
+          </th>
+          <th>
+            <a class="sort-link" th:href="@{/dashboard(page=${currentPage}, size=5, sortField='title', sortDir=${reverseSortDir})}">
+              Title <i th:if="${sortField == 'title'}" th:class="${sortDir == 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'}"></i>
+            </a>
+          </th>
+          <th>Description</th>
+          <th>
+            <a class="sort-link" th:href="@{/dashboard(page=${currentPage}, size=5, sortField='price', sortDir=${reverseSortDir})}">
+              Price <i th:if="${sortField == 'price'}" th:class="${sortDir == 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'}"></i>
+            </a>
+          </th>
+          <th class="text-center">Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="voucher : ${vouchers}">
+          <td class="align-middle" th:text="${voucher.id}"></td>
+          <td class="align-middle fw-bold" th:text="${voucher.title}"></td>
+          <td class="align-middle text-truncate" style="max-width: 300px;" th:text="${voucher.description}"></td>
+          <td class="align-middle" th:text="${#numbers.formatDecimal(voucher.price, 1, 2)} + ' $'"></td>
+          <td class="text-center">
+            <button class="btn btn-success btn-sm px-3" th:onclick="'buyVoucher(\'' + ${voucher.id} + '\')'">
+              Order
+            </button>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(vouchers)}">
+          <td colspan="5" class="text-center py-4 text-muted">No vouchers available.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-  <table class="table table-bordered table-hover">
-    <thead class="thead-light">
-    <tr>
-      <th scope="col">ID</th>
-      <th scope="col">Voucher Title</th>
-      <th scope="col">Description</th>
-      <th scope="col">Price</th>
-      <th scope="col">Action</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="voucher : ${vouchers}">
-      <td th:text="${voucher.id}"></td>
-      <td th:text="${voucher.title}"></td>
-      <td th:text="${voucher.description}"></td>
-      <td th:text="${voucher.price} + ' $'"></td>
-      <td>
-        <button class="btn btn-outline-success btn-sm">Order</button>
-      </td>
-    </tr>
-    <tr th:if="${#lists.isEmpty(vouchers)}">
-      <td colspan="5" class="text-center">No vouchers available right now.</td>
-    </tr>
-    </tbody>
-  </table>
+  <div class="pagination-container d-flex justify-content-center" th:if="${totalPages > 1}">
+    <nav aria-label="Page navigation">
+      <ul class="pagination">
+        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+          <a class="page-link" th:href="@{/dashboard(page=${currentPage - 1}, size=5, sortField=${sortField}, sortDir=${sortDir})}">Previous</a>
+        </li>
+
+        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+            th:classappend="${currentPage == i} ? 'active'">
+          <a class="page-link" th:href="@{/dashboard(page=${i}, size=5, sortField=${sortField}, sortDir=${sortDir})}" th:text="${i + 1}">1</a>
+        </li>
+
+        <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+          <a class="page-link" th:href="@{/dashboard(page=${currentPage + 1}, size=5, sortField=${sortField}, sortDir=${sortDir})}">Next</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function buyVoucher(voucherId) {
+    if(confirm('Do you want to purchase this voucher?')) {
+      alert('Processing purchase for voucher: ' + voucherId);
+    }
+  }
+
+  document.getElementById('logoutBtn').addEventListener('click', function() {
+    fetch('/api/auth/logout', { method: 'DELETE' })
+            .then(() => window.location.href = '/login');
+  });
+</script>
 </body>
 </html>
