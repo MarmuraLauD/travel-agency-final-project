@@ -35,6 +35,7 @@ public class AdminSeeder implements CommandLineRunner {
             admin.setPassword(passwordEncoder.encode(defaultPassword));
             admin.setPhoneNumber(defaultPhone);
             admin.setRole(Role.ADMIN);
+            admin.setActive(true);
 
             userRepository.save(admin);
             log.info("Default SUPERADMIN account created.");
