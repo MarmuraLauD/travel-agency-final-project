@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -42,29 +43,40 @@ public class VoucherServiceImpl implements VoucherService {
 
     @Override
     @Transactional
-    public VoucherDTO order(String id, String userId) {
+    public VoucherDTO order(String id, String userId, LocalDate arrivalDate) {
         log.info("User ID: {} is attempting to buy Voucher ID: {}", userId, id);
+
         User user = userRepository.findById(UUID.fromString(userId))
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
         Voucher voucher = voucherRepository.findById(UUID.fromString(id))
                 .orElseThrow(() -> new EntityNotFoundException("Voucher not found"));
+
         BigDecimal price = BigDecimal.valueOf(voucher.getPrice());
         BigDecimal balance = user.getBalance();
+
         if (balance.compareTo(price) < 0) {
             throw new InsufficientFundsException(price.subtract(balance).doubleValue());
         }
         user.setBalance(balance.subtract(price));
+
         voucher.setStatus(VoucherStatus.PAID);
-        if ((user.hasVoucher())) {
-            user.addVoucher(voucher);
-        } else {
-            user.setVouchers(new ArrayList<>(List.of(voucher)));
-        }
-        userRepository.save(user);
+        voucher.setArrivalDate(arrivalDate);
+        voucher.setEvictionDate(arrivalDate.plusDays(7));
+
         voucher.setUser(user);
+
+        if (user.getVouchers() == null) {
+            user.setVouchers(new ArrayList<>());
+        }
+        user.addVoucher(voucher);
+
+        userRepository.save(user);
+        Voucher savedVoucher = voucherRepository.save(voucher);
+
         log.info("Voucher ID: {} successfully purchased by User ID: {}", id, userId);
-        return voucherMapper.toVoucherDTO(voucherRepository.save(voucher));
+        return voucherMapper.toVoucherDTO(savedVoucher);
     }
+
 
     @Override
     @Transactional
@@ -94,13 +106,36 @@ public class VoucherServiceImpl implements VoucherService {
 
     @Override
     @Transactional
-    public VoucherDTO changeHotStatus(String id, VoucherDTO voucherDTO) {
+    public void cancelOrder(UUID voucherId) {
+        Voucher voucher = voucherRepository.findById(voucherId)
+                .orElseThrow(() -> new EntityNotFoundException("Voucher not found"));
+
+        if (voucher.getStatus() != VoucherStatus.PAID) {
+            throw new RuntimeException("Only paid vouchers can be canceled");
+        }
+
+        User user = voucher.getUser();
+        if (user != null) {
+            user.setBalance(user.getBalance().add(BigDecimal.valueOf(voucher.getPrice())));
+            userRepository.save(user);
+        }
+
+        voucher.setUser(null);
+        voucher.setStatus(VoucherStatus.REGISTERED);
+        voucher.setArrivalDate(null);
+        voucher.setEvictionDate(null);
+        voucherRepository.save(voucher);
+    }
+
+    @Override
+    @Transactional
+    public void changeHotStatus(String id, boolean hot) {
         log.info("Attempting to change hot status of Voucher with ID: {}.", id);
         Voucher voucher = voucherRepository.findById(UUID.fromString(id))
                 .orElseThrow(() -> new EntityNotFoundException("Voucher not found"));
-         voucher.setHot(voucherDTO.getIsHot());
+         voucher.setHot(hot);
          log.info("Changed hot status of Voucher with ID: {}.", id);
-        return voucherMapper.toVoucherDTO(voucherRepository.save(voucher));
+        voucherMapper.toVoucherDTO(voucherRepository.save(voucher));
     }
 
     @Override
@@ -133,6 +168,15 @@ public class VoucherServiceImpl implements VoucherService {
     public Page<VoucherDTO> findAllByHotelType(HotelType hotelType, Pageable pageable) {
         return voucherRepository.findAllByHotelType(hotelType, pageable)
                 .map(voucherMapper::toVoucherDTO);
+    }
+
+    @Override
+    public Page<VoucherDTO> findAllByStatus(String status, Pageable pageable) {
+        if (status == null || status.equalsIgnoreCase("REGISTERED")) {
+            return voucherRepository.findAllByStatus(VoucherStatus.REGISTERED, pageable)
+                    .map(voucherMapper::toVoucherDTO);
+        }
+        return voucherRepository.findAll(pageable).map(voucherMapper::toVoucherDTO);
     }
 
     @Override
