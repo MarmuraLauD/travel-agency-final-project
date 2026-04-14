@@ -1,5 +1,6 @@
 package com.epam.finaltask.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -42,6 +43,7 @@ public class VoucherDTO {
     @Future
     private LocalDate evictionDate;
 
+    @JsonIgnore
     private UUID userId;
 
     @NotBlank
