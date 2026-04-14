@@ -1,0 +1,52 @@
+<div xmlns:th="http://www.thymeleaf.org" th:fragment="vouchers">
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th class="sort-header" onclick="sortVouchers('title')">Title</th>
+                    <th class="sort-header" onclick="sortVouchers('tourType')">Type</th>
+                    <th class="sort-header" onclick="sortVouchers('price')">Price</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody id="admin-vouchers-list"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div xmlns:th="http://www.thymeleaf.org" th:fragment="create-voucher-form">
+    <div class="card shadow-sm border-0 p-4">
+        <form id="v-form">
+            <div class="mb-3"><label>Title</label><input type="text" id="v-title" class="form-control" required></div>
+            <div class="mb-3"><label>Description</label><textarea id="v-desc" class="form-control" required></textarea></div>
+            <div class="row mb-3">
+                <div class="col-md-3"><label>Price</label><input type="number" id="v-price" step="0.01" class="form-control" required></div>
+                <div class="col-md-3"><label>Type</label>
+                    <select id="v-tourType" class="form-select">
+                        <option value="HEALTH">Health</option>
+                        <option value="SPORTS">Sports</option>
+                        <option value="LEISURE">Leisure</option>
+                    </select>
+                </div>
+                <div class="col-md-3"><label>Status</label>
+                    <select id="v-status" class="form-select">
+                        <option value="REGISTERED">Registered</option>
+                    </select>
+                </div>
+                <div class="col-md-3"><label>Hot?</label>
+                    <select id="v-hot" class="form-select"> <option value="false">No</option>
+                        <option value="true">Yes</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6"><label>Transfer</label><select id="v-transfer" class="form-select"><option value="BUS">Bus</option><option value="PLANE">Plane</option></select></div>
+                <div class="col-md-6"><label>Hotel</label><select id="v-hotel" class="form-select"><option value="THREE_STARS">3 Stars</option><option value="FIVE_STARS">5 Stars</option></select></div>
+            </div>
+            <button type="submit" class="btn btn-success w-100">Create Voucher</button>
+        </form>
+    </div>
+</div>
