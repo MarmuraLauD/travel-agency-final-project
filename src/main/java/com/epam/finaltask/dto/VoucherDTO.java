@@ -1,6 +1,7 @@
 package com.epam.finaltask.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -46,6 +47,7 @@ public class VoucherDTO {
     @JsonIgnore
     private UUID userId;
 
-    @NotBlank
-    private Boolean isHot;
+    @NotNull
+    @JsonProperty("hot")
+    private Boolean hot;
 }

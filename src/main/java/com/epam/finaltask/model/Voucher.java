@@ -47,5 +47,5 @@ public class Voucher {
     @JsonIgnore
     private User user;
 
-    private boolean isHot;
+    private boolean hot;
 }
