@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -61,20 +62,24 @@ public class VoucherRestController {
     @PreAuthorize("hasAuthority('voucher:update')")
     @PatchMapping("/{id}/status")
     public ResponseEntity<Map<String, String>> changeHotStatus(@PathVariable String id,
-                                                               @RequestBody VoucherDTO voucherDTO){
-        voucherDTO.setId(id);
-        voucherService.changeHotStatus(id, voucherDTO);
+                                                               @RequestBody VoucherDTO voucherDTO) {
+        boolean hotStatus = (voucherDTO.getHot() != null) ? voucherDTO.getHot() : false;
+
+        voucherService.changeHotStatus(id, hotStatus);
+
         Map<String, String> response = new HashMap<>();
         response.put("statusCode", "OK");
-        response.put("statusMessage", "Voucher status is successfully changed");
+        response.put("statusMessage", "Voucher status changed");
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/{id}/order")
-    public ResponseEntity<VoucherDTO> order(@PathVariable String id, @RequestParam String userId){
+    public ResponseEntity<VoucherDTO> order(@PathVariable String id,
+                                            @RequestParam String userId,
+                                            @RequestParam LocalDate arrivalDate){
         return ResponseEntity.status(HttpStatus.OK)
-                .body(voucherService.order(id, userId));
+                .body(voucherService.order(id, userId, arrivalDate));
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -91,30 +96,17 @@ public class VoucherRestController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id,asc") String[] sort,
-            @RequestParam(required = false) String tourType,
-            @RequestParam(required = false) String transferType,
-            @RequestParam(required = false) String price,
-            @RequestParam(required = false) String hotelType) {
+            @RequestParam(required = false) String status) {
 
-        String sortField = sort[0];
-        String sortDirection = sort[1];
-        Sort.Direction direction = sortDirection.equalsIgnoreCase("desc")
-                ? Sort.Direction.DESC : Sort.Direction.ASC;
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
+        Sort.Direction direction = sort[1].equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort[0]));
 
         Page<VoucherDTO> pageTours;
 
-        if (tourType != null) {
-            pageTours = voucherService.findAllByTourType(TourType.valueOf(tourType), pageable);
-        } else if (transferType != null) {
-            pageTours = voucherService.findAllByTransferType(TransferType.valueOf(transferType), pageable);
-        } else if (price != null) {
-            pageTours = voucherService.findAllByPrice(Double.parseDouble(price), pageable);
-        } else if (hotelType != null) {
-            pageTours = voucherService.findAllByHotelType(HotelType.valueOf(hotelType), pageable);
-        } else {
+        if ("ALL".equals(status)) {
             pageTours = voucherService.findAll(pageable);
+        } else {
+            pageTours = voucherService.findAllByStatus("REGISTERED", pageable);
         }
 
         Map<String, Object> response = new HashMap<>();
@@ -122,6 +114,8 @@ public class VoucherRestController {
         response.put("currentPage", pageTours.getNumber());
         response.put("totalItems", pageTours.getTotalElements());
         response.put("totalPages", pageTours.getTotalPages());
+        response.put("sortField", sort[0]);
+        response.put("sortDir", sort[1]);
 
         return ResponseEntity.ok(response);
     }
