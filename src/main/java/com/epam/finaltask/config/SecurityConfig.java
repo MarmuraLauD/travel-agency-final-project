@@ -56,9 +56,10 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/signup", "/api/auth/signin").permitAll()
-                        .requestMatchers("/", "/dashboard").permitAll()
+                        .requestMatchers("/", "/dashboard", "/api/vouchers").permitAll()
                         .requestMatchers("/api/auth/logout").authenticated()
-                        .requestMatchers("/login", "/register").anonymous()
+                        .requestMatchers("/profile").authenticated()
+                        .requestMatchers("/login", "/register").permitAll()
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
