@@ -1,5 +1,6 @@
 package com.epam.finaltask.config;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,9 +44,16 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint((request, response, authException) -> {
-                            response.setStatus(401);
-                            response.setContentType("application/json");
-                            response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"" + authException.getMessage() + "\"}");
+                            String path = request.getServletPath();
+
+                            if (path.startsWith("/api/")) {
+                                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                                response.setContentType("application/json");
+                                response.getWriter().write("{\"error\": \"Unauthorized\"}");
+                            }
+                            else {
+                                response.sendRedirect("/login");
+                            }
                         })
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
                             response.setStatus(403);
@@ -55,8 +63,8 @@ public class SecurityConfig {
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/signup", "/api/auth/signin").permitAll()
-                        .requestMatchers("/", "/dashboard", "/api/vouchers").permitAll()
+                        .requestMatchers("/api/auth/signup", "/api/auth/signin", "/api/auth/refresh", "/").permitAll()
+                        .requestMatchers("/dashboard", "/api/vouchers").authenticated()
                         .requestMatchers("/api/auth/logout").authenticated()
                         .requestMatchers("/profile").authenticated()
                         .requestMatchers("/login", "/register").permitAll()
