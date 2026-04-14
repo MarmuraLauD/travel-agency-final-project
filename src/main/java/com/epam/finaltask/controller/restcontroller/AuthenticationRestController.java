@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -64,10 +65,12 @@ public class AuthenticationRestController {
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(HttpServletResponse response, @CookieValue("refresh_jwt") String refreshToken) {
+        log.info("Attempt to refresh token.");
         RefreshToken refresh = refreshTokenRepository.findByToken(refreshToken)
                 .orElseThrow(() -> new EntityNotFoundException("Token not found!"));
         refresh = refreshTokenService.verifyExpiration(refresh);
         String jwt = jwtService.generateToken(refresh.getUser());
+        log.info("Token successfully refreshed.");
         setCookie(response, "jwt", jwt, jwtService.getMaxAgeSeconds());
         return ResponseEntity.ok().build();
     }
