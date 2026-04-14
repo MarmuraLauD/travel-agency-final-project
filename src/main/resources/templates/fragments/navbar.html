@@ -61,7 +61,7 @@
             if (!isRefreshing) {
                 isRefreshing = true;
 
-                let refreshOk = false;
+                let refreshOk;
                 try {
                     const refreshRes = await fetch('/api/auth/refresh', { method: 'POST' });
                     refreshOk = refreshRes.ok;
