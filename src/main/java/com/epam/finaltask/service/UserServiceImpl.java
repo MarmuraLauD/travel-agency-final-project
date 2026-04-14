@@ -1,7 +1,9 @@
 package com.epam.finaltask.service;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.epam.finaltask.dto.UserDTO;
 import com.epam.finaltask.exception.DuplicateRequestException;
@@ -43,10 +45,25 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public UserDTO createUser(UserDTO userDTO) {
+		log.info("Attempting to create a new user with username: {}", userDTO.getUsername());
+		if(userRepository.existsByUsername(userDTO.getUsername())) {
+			throw new DuplicateRequestException("Username is already in use");
+		}
+		User user = userMapper.toUser(userDTO);
+		user.setRole(Role.valueOf(userDTO.getRole()));
+		user.setBalance(new BigDecimal(userDTO.getBalance()));
+		user.setActive(true);
+		user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+		log.info("User {} was successfully created with role: {}", user.getUsername(), user.getRole());
+		return userMapper.toUserDTO(userRepository.save(user));
+	}
+
+
+	@Override
 	public UserDTO updateUser(String username, UserDTO userDTO) {
 		User user = userRepository.findUserByUsername(username).orElseThrow(() -> new EntityNotFoundException("No such username"));
 		user.setUsername(userDTO.getUsername());
-		user.setPassword(userDTO.getPassword());
 		user.setRole(Role.valueOf(userDTO.getRole()));
 		user.setVouchers(userDTO.getVouchers());
 		user.setPhoneNumber(userDTO.getPhoneNumber());
@@ -101,6 +118,19 @@ public class UserServiceImpl implements UserService {
 
 		log.info("User {} role successfully updated to {}", user.getUsername(), newRole);
 		return userMapper.toUserDTO(savedUser);
+	}
+
+	@Override
+	public List<UserDTO> findAll() {
+		return userRepository.findAll()
+				.stream()
+				.map(userMapper::toUserDTO)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public boolean existsByUsername(String username) {
+		return userRepository.existsByUsername(username);
 	}
 
 }
