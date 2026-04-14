@@ -1,6 +1,8 @@
 package com.epam.finaltask.controller.restcontroller;
 
+import com.epam.finaltask.dto.UpdateUserDto;
 import com.epam.finaltask.dto.UserDTO;
+import com.epam.finaltask.mapper.UserMapper;
 import com.epam.finaltask.model.Role;
 import com.epam.finaltask.service.UserService;
 import jakarta.validation.Valid;
@@ -13,6 +15,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -23,20 +27,21 @@ import java.util.UUID;
 public class UserRestController {
 
     private final UserService userService;
+    private final UserMapper userMapper;
 
     @PreAuthorize("hasAuthority('user:create')")
     @PostMapping
     public ResponseEntity<UserDTO> create(@Valid @RequestBody UserDTO userDTO) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(userService.register(userDTO));
+                .body(userService.createUser(userDTO));
     }
 
     @PreAuthorize("hasAuthority('user:update') or authentication.principal.username == #username")
     @PatchMapping("/{username}")
     public ResponseEntity<UserDTO> updateUser(@PathVariable @Valid String username,
-                                              @Valid @RequestBody UserDTO userDTO) {
+                                              @Valid @RequestBody UpdateUserDto updateUserDto) {
         return ResponseEntity.status(HttpStatus.OK)
-                .body(userService.updateUser(username, userDTO));
+                .body(userService.updateUser(username, userMapper.toUserDTO(updateUserDto)));
     }
 
     @PreAuthorize("hasAuthority('user:read')")
@@ -74,5 +79,21 @@ public class UserRestController {
                                                   @RequestParam("role") Role role) {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(userService.changeUserRole(UUID.fromString(id), role));
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/me")
+    public ResponseEntity<UserDTO> getCurrentUser(Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        UserDTO user = userService.getUserByUsername(principal.getName());
+        return ResponseEntity.ok(user);
+    }
+
+    @PreAuthorize("hasAuthority('user:update')")
+    @GetMapping
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        return ResponseEntity.ok(userService.findAll());
     }
 }
