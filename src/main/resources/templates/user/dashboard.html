@@ -4,102 +4,209 @@
       lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Travel Agency | Dashboard</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <style>
-    .sort-link { text-decoration: none; color: inherit; }
-    .pagination-container { margin-top: 20px; }
+    .sort-link { text-decoration: none; color: inherit; display: flex; align-items: center; gap: 5px; }
+    .sort-link:hover { text-decoration: underline; }
+    .description-cell {
+      max-width: 250px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .table-hot-row {
+      background-color: #fff5f5 !important;
+      border-left: 4px solid #dc3545;
+    }
+    .hot-badge {
+      background: linear-gradient(45deg, #ff416c, #ff4b2b);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
   </style>
 </head>
 <body class="bg-light">
 
 <div th:replace="~{fragments/navbar :: header}"></div>
 
-<div class="container mt-5">
+<div class="container-fluid px-4 mt-5">
   <div class="row mb-4">
     <div class="col">
-      <h2 class="fw-bold">Available Tour Vouchers</h2>
-      <p class="text-muted">Total vouchers found: <span th:text="${totalItems}">0</span></p>
+      <h2 class="fw-bold">Available Tours</h2>
+      <p class="text-muted">Total vouchers: <span th:text="${totalItems}">0</span></p>
     </div>
   </div>
 
-  <div class="card shadow-sm">
+  <div class="card shadow-sm border-0">
     <div class="card-body p-0">
-      <table class="table table-hover mb-0">
-        <thead class="table-light">
-        <tr>
-          <th>
-            <a class="sort-link" th:href="@{/dashboard(page=${currentPage}, size=5, sortField='id', sortDir=${reverseSortDir})}">
-              #ID <i th:if="${sortField == 'id'}" th:class="${sortDir == 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'}"></i>
-            </a>
-          </th>
-          <th>
-            <a class="sort-link" th:href="@{/dashboard(page=${currentPage}, size=5, sortField='title', sortDir=${reverseSortDir})}">
-              Title <i th:if="${sortField == 'title'}" th:class="${sortDir == 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'}"></i>
-            </a>
-          </th>
-          <th>Description</th>
-          <th>
-            <a class="sort-link" th:href="@{/dashboard(page=${currentPage}, size=5, sortField='price', sortDir=${reverseSortDir})}">
-              Price <i th:if="${sortField == 'price'}" th:class="${sortDir == 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'}"></i>
-            </a>
-          </th>
-          <th class="text-center">Action</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="voucher : ${vouchers}">
-          <td class="align-middle" th:text="${voucher.id}"></td>
-          <td class="align-middle fw-bold" th:text="${voucher.title}"></td>
-          <td class="align-middle text-truncate" style="max-width: 300px;" th:text="${voucher.description}"></td>
-          <td class="align-middle" th:text="${#numbers.formatDecimal(voucher.price, 1, 2)} + ' $'"></td>
-          <td class="text-center">
-            <button class="btn btn-success btn-sm px-3" th:onclick="'buyVoucher(\'' + ${voucher.id} + '\')'">
-              Order
-            </button>
-          </td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(vouchers)}">
-          <td colspan="5" class="text-center py-4 text-muted">No vouchers available.</td>
-        </tr>
-        </tbody>
-      </table>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+          <thead class="table-dark">
+          <tr>
+            <th>
+              <a class="sort-link text-white" th:href="@{/dashboard(page=${currentPage}, sortField='title', sortDir=${reverseSortDir})}">
+                Title
+                <i th:if="${sortField == 'title'}" th:class="${sortDir == 'asc' ? 'bi bi-sort-alpha-down' : 'bi bi-sort-alpha-up'}"></i>
+              </a>
+            </th>
+            <th>Description</th>
+            <th>
+              <a class="sort-link text-white" th:href="@{/dashboard(page=${currentPage}, sortField='tourType', sortDir=${reverseSortDir})}">
+                Type
+                <i th:if="${sortField == 'tourType'}" th:class="${sortDir == 'asc' ? 'bi bi-sort-down' : 'bi bi-sort-up'}"></i>
+              </a>
+            </th>
+            <th>Transfer</th>
+            <th>Hotel</th>
+            <th>
+              <a class="sort-link text-white" th:href="@{/dashboard(page=${currentPage}, sortField='price', sortDir=${reverseSortDir})}">
+                Price
+                <i th:if="${sortField == 'price'}" th:class="${sortDir == 'asc' ? 'bi bi-sort-numeric-down' : 'bi bi-sort-numeric-up'}"></i>
+              </a>
+            </th>
+            <th class="text-center">Action</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="voucher : ${vouchers}"
+              th:classappend="${voucher.hot != null && voucher.hot} ? 'table-hot-row' : ''">
+            <td class="fw-bold">
+              <span th:text="${voucher.title}"></span>
+              <span th:if="${voucher.hot != null && voucher.hot}"
+                    class="badge hot-badge ms-1">🔥 HOT</span>
+            </td>
+            <td class="description-cell" th:attr="title=${voucher.description}" th:text="${voucher.description}"></td>
+            <td>
+              <span class="badge bg-info text-dark" th:text="${voucher.tourType}"></span>
+            </td>
+            <td>
+              <i class="bi bi-truck me-1"></i><span th:text="${voucher.transferType}"></span>
+            </td>
+            <td>
+              <i class="bi bi-building me-1"></i><span th:text="${voucher.hotelType}"></span>
+            </td>
+            <td class="fw-bold text-primary" th:text="'$' + ${#numbers.formatDecimal(voucher.price, 1, 2)}"></td>
+            <td class="text-center">
+              <button type="button"
+                      class="btn btn-sm btn-success px-4 rounded-pill"
+                      th:data-id="${voucher.id}"
+                      onclick="openPurchaseModal(this.getAttribute('data-id'))">
+                <i class="bi bi-cart-plus"></i> Buy
+              </button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <div class="pagination-container d-flex justify-content-center" th:if="${totalPages > 1}">
+  <div class="mt-4 d-flex justify-content-center" th:if="${totalPages > 1}">
     <nav aria-label="Page navigation">
-      <ul class="pagination">
+      <ul class="pagination shadow-sm">
         <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-          <a class="page-link" th:href="@{/dashboard(page=${currentPage - 1}, size=5, sortField=${sortField}, sortDir=${sortDir})}">Previous</a>
+          <a class="page-link" th:href="@{/dashboard(page=${currentPage - 1}, sortField=${sortField}, sortDir=${sortDir})}">Previous</a>
         </li>
-
         <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
             th:classappend="${currentPage == i} ? 'active'">
-          <a class="page-link" th:href="@{/dashboard(page=${i}, size=5, sortField=${sortField}, sortDir=${sortDir})}" th:text="${i + 1}">1</a>
+          <a class="page-link" th:href="@{/dashboard(page=${i}, sortField=${sortField}, sortDir=${sortDir})}" th:text="${i + 1}">1</a>
         </li>
-
         <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-          <a class="page-link" th:href="@{/dashboard(page=${currentPage + 1}, size=5, sortField=${sortField}, sortDir=${sortDir})}">Next</a>
+          <a class="page-link" th:href="@{/dashboard(page=${currentPage + 1}, sortField=${sortField}, sortDir=${sortDir})}">Next</a>
         </li>
       </ul>
     </nav>
   </div>
 </div>
 
+<div class="modal fade" id="purchaseModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title"><i class="bi bi-calendar-check me-2"></i>Select Arrival Date</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="purchase-voucher-id">
+        <div class="mb-3">
+          <label class="form-label fw-bold">Arrival Date</label>
+          <input type="date" id="purchase-arrival-date" class="form-control" required>
+        </div>
+        <div class="alert alert-info py-2 small">
+          <i class="bi bi-info-circle me-1"></i> Standard stay duration is 7 days.
+        </div>
+        <div id="purchase-error" class="alert alert-danger d-none mt-2"></div>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary px-4" onclick="confirmPurchase()">Confirm & Pay</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  function buyVoucher(voucherId) {
-    if(confirm('Do you want to purchase this voucher?')) {
-      alert('Processing purchase for voucher: ' + voucherId);
-    }
+  let purchaseModalInstance;
+
+  document.addEventListener("DOMContentLoaded", () => {
+    purchaseModalInstance = new bootstrap.Modal(document.getElementById('purchaseModal'));
+    const dateInput = document.getElementById('purchase-arrival-date');
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.setAttribute('min', today);
+  });
+
+  function openPurchaseModal(voucherId) {
+    document.getElementById('purchase-voucher-id').value = voucherId;
+    document.getElementById('purchase-arrival-date').value = '';
+    document.getElementById('purchase-error').classList.add('d-none');
+    purchaseModalInstance.show();
   }
 
-  document.getElementById('logoutBtn').addEventListener('click', function() {
-    fetch('/api/auth/logout', { method: 'DELETE' })
-            .then(() => window.location.href = '/login');
-  });
+  async function confirmPurchase() {
+    const voucherId = document.getElementById('purchase-voucher-id').value;
+    const arrivalDate = document.getElementById('purchase-arrival-date').value;
+    const errorDiv = document.getElementById('purchase-error');
+
+    if (!arrivalDate) {
+      errorDiv.innerText = 'Please select an arrival date.';
+      errorDiv.classList.remove('d-none');
+      return;
+    }
+
+    errorDiv.classList.add('d-none');
+
+    try {
+      const userRes = await fetch('/api/users/me');
+      if (!userRes.ok) {
+        window.location.href = '/login';
+        return;
+      }
+      const user = await userRes.json();
+
+      const orderRes = await fetch(`/api/vouchers/${voucherId}/order?userId=${user.id}&arrivalDate=${arrivalDate}`, {
+        method: 'POST'
+      });
+
+      if (orderRes.ok) {
+        purchaseModalInstance.hide();
+        window.location.href = '/profile';
+      } else {
+        const errorData = await orderRes.json().catch(() => ({}));
+        errorDiv.innerText = errorData.message || 'Purchase failed.';
+        errorDiv.classList.remove('d-none');
+      }
+    } catch (err) {
+      errorDiv.innerText = 'Network error.';
+      errorDiv.classList.remove('d-none');
+    }
+  }
 </script>
 </body>
 </html>
