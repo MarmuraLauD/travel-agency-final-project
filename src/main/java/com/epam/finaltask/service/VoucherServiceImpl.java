@@ -147,30 +147,6 @@ public class VoucherServiceImpl implements VoucherService {
     }
 
     @Override
-    public Page<VoucherDTO> findAllByTourType(TourType tourType, Pageable pageable) {
-        return voucherRepository.findAllByTourType(tourType, pageable)
-                .map(voucherMapper::toVoucherDTO);
-    }
-
-    @Override
-    public Page<VoucherDTO> findAllByTransferType(TransferType transferType, Pageable pageable) {
-        return voucherRepository.findAllByTransferType(transferType, pageable)
-                .map(voucherMapper::toVoucherDTO);
-    }
-
-    @Override
-    public Page<VoucherDTO> findAllByPrice(Double price, Pageable pageable) {
-        return voucherRepository.findAllByPrice(price, pageable)
-                .map(voucherMapper::toVoucherDTO);
-    }
-
-    @Override
-    public Page<VoucherDTO> findAllByHotelType(HotelType hotelType, Pageable pageable) {
-        return voucherRepository.findAllByHotelType(hotelType, pageable)
-                .map(voucherMapper::toVoucherDTO);
-    }
-
-    @Override
     public Page<VoucherDTO> findAllByStatus(String status, Pageable pageable) {
         if (status == null || status.equalsIgnoreCase("REGISTERED")) {
             return voucherRepository.findAllByStatus(VoucherStatus.REGISTERED, pageable)
