@@ -15,5 +15,5 @@ public interface VoucherRepository extends JpaRepository<Voucher, UUID> {
     Page<Voucher> findAllByPrice(Double price, Pageable pageable);
     Page<Voucher> findAllByHotelType(HotelType hotelType, Pageable pageable);
     Page<Voucher> findAllByStatus(VoucherStatus voucherStatus, Pageable pageable);
-    Page<Voucher> findAllByIsHotTrue(Pageable pageable);
+    Page<Voucher> findAllByHotTrue(Pageable pageable);
 }
