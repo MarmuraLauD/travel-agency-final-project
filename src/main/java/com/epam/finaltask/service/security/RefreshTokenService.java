@@ -41,6 +41,10 @@ public class RefreshTokenService {
         return token;
     }
 
+    public boolean isExpired(RefreshToken token) {
+        return (token.getExpiryDate().compareTo(Instant.now()) < 0);
+    }
+
     @Transactional
     public void deleteByUserId(UUID userId) {
         refreshTokenRepository.deleteByUser(userRepository.findById(UUID.fromString(String.valueOf(userId)))
