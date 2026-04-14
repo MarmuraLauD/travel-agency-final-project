@@ -10,6 +10,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -36,6 +38,7 @@ public class AdminSeeder implements CommandLineRunner {
             admin.setPhoneNumber(defaultPhone);
             admin.setRole(Role.ADMIN);
             admin.setActive(true);
+            admin.setBalance(new BigDecimal(0));
 
             userRepository.save(admin);
             log.info("Default SUPERADMIN account created.");
