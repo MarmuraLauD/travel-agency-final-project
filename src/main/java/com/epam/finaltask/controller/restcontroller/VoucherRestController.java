@@ -1,9 +1,6 @@
 package com.epam.finaltask.controller.restcontroller;
 
 import com.epam.finaltask.dto.VoucherDTO;
-import com.epam.finaltask.model.HotelType;
-import com.epam.finaltask.model.TourType;
-import com.epam.finaltask.model.TransferType;
 import com.epam.finaltask.service.VoucherService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

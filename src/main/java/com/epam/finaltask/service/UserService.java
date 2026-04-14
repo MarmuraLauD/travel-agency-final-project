@@ -17,5 +17,5 @@ public interface UserService {
     void deleteUserById(UUID id);
     UserDTO changeUserRole(UUID userId, Role newRole);
     List<UserDTO> findAll();
-    boolean existsByUsername(String username);
+
 }

@@ -19,11 +19,6 @@ public interface VoucherService {
     void changeHotStatus(String id, boolean hot);
     List<VoucherDTO> findAllByUserId(UUID userId);
     void cancelOrder(UUID voucherId);
-
-    Page<VoucherDTO> findAllByTourType(TourType tourType, Pageable pageable);
-    Page<VoucherDTO> findAllByTransferType(TransferType transferType, Pageable pageable);
-    Page<VoucherDTO> findAllByPrice(Double price, Pageable pageable);
-    Page<VoucherDTO> findAllByHotelType(HotelType hotelType, Pageable pageable);
     Page<VoucherDTO> findAllByStatus(String status, Pageable pageable);
 
 
