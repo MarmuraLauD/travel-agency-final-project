@@ -70,14 +70,14 @@ public class VoucherRestController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PreAuthorize("hasAuthority('voucher:update')")
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/{id}/order")
     public ResponseEntity<VoucherDTO> order(@PathVariable String id, @RequestParam String userId){
         return ResponseEntity.status(HttpStatus.OK)
                 .body(voucherService.order(id, userId));
     }
 
-    @PreAuthorize("hasAuthority('voucher:read')")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/user/{userId}")
     public ResponseEntity<Map<String, Object>> getVouchersByUserId(@PathVariable String userId) {
         Map<String, Object> response = new HashMap<>();
