@@ -25,12 +25,11 @@ public class UIController {
         return "index";
     }
 
-    @GetMapping("/login")
-    public String loginPage() {
-        if (isAuthenticated()) {
-            return "redirect:/dashboard";
-        }
-        return "auth/sign-in";
+
+
+    @GetMapping("/admin")
+    public String adminDashboard() {
+        return "admin/dashboard";
     }
 
     @GetMapping("/dashboard")
@@ -58,19 +57,11 @@ public class UIController {
         return "user/dashboard";
     }
 
-    @GetMapping("/register")
-    public String registerPage() {
-        if (isAuthenticated()) {
-            return "redirect:/dashboard";
-        }
-        return "auth/sign-up";
+    @GetMapping("/profile")
+    public String showProfilePage() {
+        return "user/profile";
     }
 
-    private boolean isAuthenticated() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || "anonymousUser".equals(authentication.getPrincipal())) {
-            return false;
-        }
-        return authentication.isAuthenticated();
-    }
+
+
 }
