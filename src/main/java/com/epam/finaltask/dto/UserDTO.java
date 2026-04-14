@@ -26,7 +26,6 @@ public class UserDTO {
 	@NotBlank
 	private String role;
 
-	@NotNull
 	private List<Voucher> vouchers;
 
 	@NotNull
