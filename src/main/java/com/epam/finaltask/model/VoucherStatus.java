@@ -1,5 +1,5 @@
 package com.epam.finaltask.model;
 
 public enum VoucherStatus {
-    REGISTERED, PAID, CANCELED
+    REGISTERED, PENDING, CONFIRMED, CANCELED, PAID
 }
