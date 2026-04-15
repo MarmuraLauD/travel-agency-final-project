@@ -156,8 +156,47 @@ public class VoucherServiceImpl implements VoucherService {
     }
 
     @Override
+    public Page<VoucherDTO> findAllByHot(Pageable pageable) {
+        return voucherRepository.findAllByHotTrue(pageable).map(voucherMapper::toVoucherDTO);
+    }
+
+    @Override
     public Page<VoucherDTO> findAll(Pageable pageable) {
         return voucherRepository.findAll(pageable)
+                .map(voucherMapper::toVoucherDTO);
+    }
+
+    @Override
+    public Page<VoucherDTO> findAllByStatusAndHot(String status, boolean hot, Pageable pageable) {
+        VoucherStatus voucherStatus = VoucherStatus.valueOf(status.toUpperCase());
+        return voucherRepository.findAllByStatusAndHot(voucherStatus, hot, pageable)
+                .map(voucherMapper::toVoucherDTO);
+    }
+
+    @Override
+    public Page<VoucherDTO> searchByTitle(String title, String status, Pageable pageable) {
+        log.info("Searching vouchers by title: {}, status: {}", title, status);
+        VoucherStatus voucherStatus = VoucherStatus.valueOf(status.toUpperCase());
+
+        if (title == null || title.trim().isEmpty()) {
+            return voucherRepository.findAllByStatus(voucherStatus, pageable)
+                    .map(voucherMapper::toVoucherDTO);
+        }
+
+        return voucherRepository.findAllByStatusAndTitleContainingIgnoreCase(voucherStatus, title.trim(), pageable)
+                .map(voucherMapper::toVoucherDTO);
+    }
+
+    @Override
+    public Page<VoucherDTO> searchWithFilters(String title, String tourType, String transferType,
+                                               String hotelType, Boolean hot, String status, Pageable pageable) {
+        log.info("Searching vouchers with filters - title: {}, tourType: {}, transferType: {}, hotelType: {}, hot: {}, status: {}",
+                title, tourType, transferType, hotelType, hot, status);
+
+        Specification<Voucher> spec = VoucherSpecification.filterVouchers(
+                title, tourType, transferType, hotelType, hot, status);
+
+        return voucherRepository.findAll(spec, pageable)
                 .map(voucherMapper::toVoucherDTO);
     }
 }
