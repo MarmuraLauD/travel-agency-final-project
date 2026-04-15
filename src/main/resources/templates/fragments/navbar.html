@@ -1,9 +1,69 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
 <div th:fragment="header">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+    <style>
+        .modern-navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .navbar-brand {
+            font-weight: 600;
+            color: #2d3748 !important;
+            font-size: 1.25rem;
+        }
+        .nav-link {
+            color: #4a5568 !important;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .nav-link:hover {
+            color: #667eea !important;
+        }
+        .btn-nav-signin {
+            border: 1px solid #667eea;
+            color: #667eea;
+            border-radius: 8px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-nav-signin:hover {
+            background: #667eea;
+            color: white;
+        }
+        .btn-nav-signup {
+            background: #667eea;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-nav-signup:hover {
+            background: #5a67d8;
+        }
+        .btn-logout {
+            background: #fc8181;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            padding: 0.5rem 1.25rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-logout:hover {
+            background: #f56565;
+        }
+        .user-greeting {
+            color: #4a5568;
+            font-weight: 500;
+        }
+    </style>
+    <nav class="navbar navbar-expand-lg modern-navbar">
         <div class="container">
-            <a class="navbar-brand fw-bold" th:href="@{/}">🌍 Travel Agency</a>
+            <a class="navbar-brand" th:href="@{/}">Travel Agency</a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -12,26 +72,24 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item" sec:authorize="isAuthenticated()">
-                        <a class="nav-link text-info" th:href="@{/dashboard}">Tours Dashboard</a>
+                        <a class="nav-link" th:href="@{/dashboard}">Tours</a>
                     </li>
                     <li class="nav-item" sec:authorize="isAuthenticated()">
-                        <a class="nav-link text-warning fw-bold" th:href="@{/profile}">My Profile</a>
+                        <a class="nav-link" th:href="@{/profile}">Profile</a>
                     </li>
                     <li class="nav-item" sec:authorize="hasAnyAuthority('voucher:create', 'voucher:update')">
-                        <a class="nav-link text-danger fw-bold" th:href="@{/admin}">
-                            <i class="bi bi-shield-lock-fill"></i> Admin Panel
-                        </a>
+                        <a class="nav-link" th:href="@{/admin}">Admin</a>
                     </li>
                 </ul>
 
-                <div class="d-flex align-items-center">
+                <div class="d-flex align-items-center gap-2">
                     <div sec:authorize="isAnonymous()">
-                        <a th:href="@{/login}" class="btn btn-outline-light btn-sm me-2">Sign In</a>
-                        <a th:href="@{/register}" class="btn btn-warning btn-sm">Sign Up</a>
+                        <a th:href="@{/login}" class="btn btn-nav-signin btn-sm me-2">Sign In</a>
+                        <a th:href="@{/register}" class="btn btn-nav-signup btn-sm">Sign Up</a>
                     </div>
-                    <div sec:authorize="isAuthenticated()" class="text-white d-flex align-items-center">
-                        <span class="me-3">Hi, <b sec:authentication="name">User</b></span>
-                        <button id="globalLogoutBtn" class="btn btn-danger btn-sm">Logout</button>
+                    <div sec:authorize="isAuthenticated()" class="d-flex align-items-center gap-3">
+                        <span class="user-greeting">Hi, <b sec:authentication="name">User</b></span>
+                        <button id="globalLogoutBtn" class="btn btn-logout btn-sm">Logout</button>
                     </div>
                 </div>
             </div>
