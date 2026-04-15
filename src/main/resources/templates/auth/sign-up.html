@@ -5,56 +5,97 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Travel Agency | Sign Up</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    .auth-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .auth-header {
+      font-size: 1.75rem;
+      font-weight: 300;
+      color: #2d3748;
+    }
+    .form-control {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      transition: all 0.2s;
+    }
+    .form-control:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    .btn-signup {
+      background: #667eea;
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .btn-signup:hover {
+      background: #5a67d8;
+      transform: translateY(-1px);
+    }
+    .form-label {
+      font-weight: 500;
+      color: #4a5568;
+      font-size: 0.875rem;
+    }
+    .form-text {
+      color: #718096;
+      font-size: 0.8rem;
+    }
+  </style>
 </head>
-<body class="bg-light">
+<body>
 
 <div th:replace="~{fragments/navbar :: header}"></div>
 
-<div class="container mt-5">
+<div class="container mt-5 pt-5">
   <div class="row justify-content-center">
     <div class="col-md-5">
-      <div class="card shadow border-0">
-        <div class="card-body p-4 p-md-5">
-          <h2 class="text-center fw-bold mb-4">Create Account</h2>
-          <p class="text-center text-muted mb-4">Join our travel community today!</p>
+      <div class="auth-card shadow-lg p-5">
+        <h2 class="auth-header text-center mb-2">Create Account</h2>
+        <p class="text-center text-muted mb-4 small">Join our travel community today</p>
 
-          <form id="registerForm">
-            <div class="mb-3">
-              <label for="username" class="form-label">Username</label>
-              <input type="text" class="form-control" id="username"
-                     placeholder="3 to 20 characters" required minlength="3" maxlength="20">
-              <div class="form-text">Choose a unique name for your profile.</div>
-            </div>
-
-            <div class="mb-3">
-              <label for="phoneNumber" class="form-label">Phone Number</label>
-              <input type="tel" class="form-control" id="phoneNumber"
-                     placeholder="+380..." required>
-            </div>
-
-            <div class="mb-4">
-              <label for="password" class="form-label">Password</label>
-              <input type="password" class="form-control" id="password"
-                     placeholder="At least 6 characters" required minlength="6">
-            </div>
-
-            <div id="error-box" class="alert alert-danger d-none" role="alert"></div>
-            <div id="success-box" class="alert alert-success d-none" role="alert">
-              Registration successful! Redirecting to login page...
-            </div>
-
-            <button type="submit" class="btn btn-warning w-100 fw-bold py-2">Sign Up</button>
-          </form>
-
-          <div class="text-center mt-4">
-            <span class="text-muted">Already have an account?</span>
-            <a th:href="@{/login}" class="text-decoration-none fw-bold ms-1">Sign In</a>
+        <form id="registerForm">
+          <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="username"
+                   placeholder="3 to 20 characters" required minlength="3" maxlength="20">
+            <div class="form-text">Choose a unique name for your profile</div>
           </div>
-        </div>
-      </div>
 
-      <div class="text-center mt-4 text-muted small">
-        &copy; 2026 Travel Agency Inc. All rights reserved.
+          <div class="mb-3">
+            <label for="phoneNumber" class="form-label">Phone Number</label>
+            <input type="tel" class="form-control" id="phoneNumber"
+                   placeholder="+380..." required>
+          </div>
+
+          <div class="mb-4">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password"
+                   placeholder="At least 6 characters" required minlength="6">
+          </div>
+
+          <div id="error-box" class="alert alert-danger d-none" role="alert"></div>
+          <div id="success-box" class="alert alert-success d-none" role="alert">
+            Registration successful! Redirecting to login page...
+          </div>
+
+          <button type="submit" class="btn btn-signup text-white w-100">Sign Up</button>
+        </form>
+
+        <div class="text-center mt-4">
+          <span class="text-muted small">Already have an account?</span>
+          <a th:href="@{/login}" class="text-decoration-none small fw-semibold ms-1" style="color: #667eea;">Sign In</a>
+        </div>
       </div>
     </div>
   </div>
