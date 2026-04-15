@@ -35,6 +35,11 @@ public class UIController {
                             @RequestParam(defaultValue = "5") int size,
                             @RequestParam(defaultValue = "title") String sortField,
                             @RequestParam(defaultValue = "asc") String sortDir,
+                            @RequestParam(required = false) String search,
+                            @RequestParam(required = false) String tourType,
+                            @RequestParam(required = false) String transferType,
+                            @RequestParam(required = false) String hotelType,
+                            @RequestParam(required = false) Boolean hot,
                             Model model) {
 
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ?
@@ -42,7 +47,20 @@ public class UIController {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<VoucherDTO> voucherPage = voucherService.findAllByStatus("REGISTERED", pageable);
+        Page<VoucherDTO> voucherPage;
+
+        boolean hasFilters = (search != null && !search.trim().isEmpty()) ||
+                (tourType != null && !tourType.isEmpty() && !tourType.equals("ALL")) ||
+                (transferType != null && !transferType.isEmpty() && !transferType.equals("ALL")) ||
+                (hotelType != null && !hotelType.isEmpty() && !hotelType.equals("ALL")) ||
+                (hot != null && hot);
+
+        if (hasFilters) {
+            voucherPage = voucherService.searchWithFilters(
+                    search, tourType, transferType, hotelType, hot, "REGISTERED", pageable);
+        } else {
+            voucherPage = voucherService.findAllByStatus("REGISTERED", pageable);
+        }
 
         model.addAttribute("vouchers", voucherPage.getContent());
         model.addAttribute("currentPage", page);
@@ -52,6 +70,13 @@ public class UIController {
         model.addAttribute("sortField", sortField);
         model.addAttribute("sortDir", sortDir);
         model.addAttribute("reverseSortDir", sortDir.equals("asc") ? "desc" : "asc");
+
+        model.addAttribute("search", search != null ? search : "");
+        model.addAttribute("tourType", tourType != null ? tourType : "ALL");
+        model.addAttribute("transferType", transferType != null ? transferType : "ALL");
+        model.addAttribute("hotelType", hotelType != null ? hotelType : "ALL");
+        model.addAttribute("hot", hot != null && hot);
+
         return "user/dashboard";
     }
 
