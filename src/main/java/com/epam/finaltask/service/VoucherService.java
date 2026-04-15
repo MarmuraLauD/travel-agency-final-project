@@ -14,13 +14,16 @@ import org.springframework.data.domain.Pageable;
 public interface VoucherService {
     VoucherDTO create(VoucherDTO voucherDTO);
     VoucherDTO order(String id, String userId, LocalDate arrivalDate);
+    VoucherDTO confirmOrder(UUID voucherId);
     VoucherDTO update(String id, VoucherDTO voucherDTO);
     void delete(String voucherId);
     void changeHotStatus(String id, boolean hot);
     List<VoucherDTO> findAllByUserId(UUID userId);
     void cancelOrder(UUID voucherId);
     Page<VoucherDTO> findAllByStatus(String status, Pageable pageable);
-
-
+    Page<VoucherDTO> findAllByHot(Pageable pageable);
     Page<VoucherDTO> findAll(Pageable pageable);
+    Page<VoucherDTO> findAllByStatusAndHot(String status, boolean hot, Pageable pageable);
+    Page<VoucherDTO> searchByTitle(String title, String status, Pageable pageable);
+    Page<VoucherDTO> searchWithFilters(String title, String tourType, String transferType, String hotelType, Boolean hot, String status, Pageable pageable);
 }
