@@ -2,6 +2,8 @@ package com.epam.finaltask.service;
 
 import com.epam.finaltask.dto.VoucherDTO;
 import com.epam.finaltask.exception.InsufficientFundsException;
+import com.epam.finaltask.exception.InvalidDateException;
+import com.epam.finaltask.exception.InvalidVoucherStatusException;
 import com.epam.finaltask.mapper.VoucherMapper;
 import com.epam.finaltask.model.*;
 import com.epam.finaltask.repository.UserRepository;
@@ -48,14 +50,27 @@ public class VoucherServiceImpl implements VoucherService {
     public VoucherDTO order(String id, String userId, LocalDate arrivalDate) {
         log.info("User ID: {} is attempting to add Voucher ID: {} to cart", userId, id);
 
+        if (arrivalDate == null) {
+            throw new InvalidDateException("Arrival date cannot be empty");
+        }
+        if (arrivalDate.isBefore(LocalDate.now())) {
+            throw new InvalidDateException("Arrival date cannot be in the past. Please select a date starting from today.");
+        }
+
         User user = userRepository.findById(UUID.fromString(userId))
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
         Voucher voucher = voucherRepository.findById(UUID.fromString(id))
                 .orElseThrow(() -> new EntityNotFoundException("Voucher not found"));
 
+        if (voucher.getStatus() != VoucherStatus.REGISTERED) {
+            throw new InvalidVoucherStatusException("This voucher is no longer available for booking");
+        }
+
+        LocalDate evictionDate = arrivalDate.plusDays(7);
+
         voucher.setStatus(VoucherStatus.PENDING);
         voucher.setArrivalDate(arrivalDate);
-        voucher.setEvictionDate(arrivalDate.plusDays(7));
+        voucher.setEvictionDate(evictionDate);
 
         voucher.setUser(user);
 
@@ -80,12 +95,12 @@ public class VoucherServiceImpl implements VoucherService {
                 .orElseThrow(() -> new EntityNotFoundException("Voucher not found"));
 
         if (voucher.getStatus() != VoucherStatus.PENDING) {
-            throw new RuntimeException("Only pending vouchers can be confirmed");
+            throw new InvalidVoucherStatusException("Only vouchers in cart can be confirmed");
         }
 
         User user = voucher.getUser();
         if (user == null) {
-            throw new RuntimeException("Voucher has no associated user");
+            throw new InvalidVoucherStatusException("Voucher is not associated with a user");
         }
 
         BigDecimal price = BigDecimal.valueOf(voucher.getPrice());
@@ -139,7 +154,7 @@ public class VoucherServiceImpl implements VoucherService {
                 .orElseThrow(() -> new EntityNotFoundException("Voucher not found"));
 
         if (voucher.getStatus() != VoucherStatus.PENDING) {
-            throw new RuntimeException("Only pending vouchers can be canceled");
+            throw new InvalidVoucherStatusException("Only vouchers in cart can be cancelled");
         }
 
         User user = voucher.getUser();
