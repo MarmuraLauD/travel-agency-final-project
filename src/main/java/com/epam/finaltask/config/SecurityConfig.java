@@ -64,10 +64,10 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/signup", "/api/auth/signin", "/api/auth/refresh", "/").permitAll()
+                        .requestMatchers("/login", "/register", "/locale").permitAll()
                         .requestMatchers("/dashboard", "/api/vouchers").authenticated()
                         .requestMatchers("/api/auth/logout").authenticated()
                         .requestMatchers("/profile").authenticated()
-                        .requestMatchers("/login", "/register").permitAll()
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
