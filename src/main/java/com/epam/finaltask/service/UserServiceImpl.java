@@ -127,10 +127,4 @@ public class UserServiceImpl implements UserService {
 				.map(userMapper::toUserDTO)
 				.collect(Collectors.toList());
 	}
-
-	@Override
-	public boolean existsByUsername(String username) {
-		return userRepository.existsByUsername(username);
-	}
-
 }
