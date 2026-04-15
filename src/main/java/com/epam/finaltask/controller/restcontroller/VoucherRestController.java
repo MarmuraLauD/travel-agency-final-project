@@ -2,6 +2,7 @@ package com.epam.finaltask.controller.restcontroller;
 
 import com.epam.finaltask.dto.VoucherDTO;
 import com.epam.finaltask.service.VoucherService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,7 +27,7 @@ public class VoucherRestController {
 
     @PreAuthorize("hasAuthority('voucher:create')")
     @PostMapping
-    public ResponseEntity<Map<String, String>> createVoucher(@RequestBody VoucherDTO voucherDTO){
+    public ResponseEntity<Map<String, String>> createVoucher(@Valid @RequestBody VoucherDTO voucherDTO){
         voucherService.create(voucherDTO);
         Map<String, String> response = new HashMap<>();
         response.put("statusCode", "OK");
@@ -37,7 +38,7 @@ public class VoucherRestController {
     @PreAuthorize("hasAuthority('voucher:update')")
     @PatchMapping("/{id}")
     public ResponseEntity<Map<String, String>> updateVoucher(@PathVariable String id,
-                                                             @RequestBody VoucherDTO voucherDTO){
+                                                             @Valid @RequestBody VoucherDTO voucherDTO){
         voucherDTO.setId(id);
         voucherService.update(id, voucherDTO);
         Map<String, String> response = new HashMap<>();
