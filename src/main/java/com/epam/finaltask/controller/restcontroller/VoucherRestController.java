@@ -134,4 +134,10 @@ public class VoucherRestController {
         voucherService.cancelOrder(id);
         return ResponseEntity.ok().build();
     }
+
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/{id}/confirm")
+    public ResponseEntity<VoucherDTO> confirmOrder(@PathVariable UUID id) {
+        return ResponseEntity.ok(voucherService.confirmOrder(id));
+    }
 }
