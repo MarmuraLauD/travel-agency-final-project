@@ -1,6 +1,6 @@
 package com.epam.finaltask.config.bootstrap;
 
-import com.epam.finaltask.model.Role; // Убедись, что импортируешь свой Enum Role
+import com.epam.finaltask.model.Role;
 import com.epam.finaltask.model.User;
 import com.epam.finaltask.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

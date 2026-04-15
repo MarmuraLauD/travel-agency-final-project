@@ -60,10 +60,32 @@
             color: #4a5568;
             font-weight: 500;
         }
+        .btn-language {
+            border: 1px solid #e2e8f0;
+            color: #4a5568;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            background: white;
+        }
+        .btn-language:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+        .language-dropdown .dropdown-item {
+            color: #4a5568;
+            padding: 0.5rem 1rem;
+            transition: all 0.2s;
+        }
+        .language-dropdown .dropdown-item:hover {
+            background: #f7fafc;
+            color: #667eea;
+        }
     </style>
     <nav class="navbar navbar-expand-lg modern-navbar">
         <div class="container">
-            <a class="navbar-brand" th:href="@{/}">Travel Agency</a>
+            <a class="navbar-brand" th:href="@{/}" th:text="#{app.title}">Travel Agency</a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -72,24 +94,33 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item" sec:authorize="isAuthenticated()">
-                        <a class="nav-link" th:href="@{/dashboard}">Tours</a>
+                        <a class="nav-link" th:href="@{/dashboard}" th:text="#{nav.dashboard}">Tours</a>
                     </li>
                     <li class="nav-item" sec:authorize="isAuthenticated()">
-                        <a class="nav-link" th:href="@{/profile}">Profile</a>
+                        <a class="nav-link" th:href="@{/profile}" th:text="#{nav.profile}">Profile</a>
                     </li>
                     <li class="nav-item" sec:authorize="hasAnyAuthority('voucher:create', 'voucher:update')">
-                        <a class="nav-link" th:href="@{/admin}">Admin</a>
+                        <a class="nav-link" th:href="@{/admin}" th:text="#{nav.admin}">Admin</a>
                     </li>
                 </ul>
 
                 <div class="d-flex align-items-center gap-2">
+                    <div class="dropdown language-dropdown">
+                        <button class="btn btn-language btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-globe"></i> <span th:text="#{app.language}">Language</span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/locale?lang=en">English</a></li>
+                            <li><a class="dropdown-item" href="/locale?lang=uk">Українська</a></li>
+                        </ul>
+                    </div>
                     <div sec:authorize="isAnonymous()">
-                        <a th:href="@{/login}" class="btn btn-nav-signin btn-sm me-2">Sign In</a>
-                        <a th:href="@{/register}" class="btn btn-nav-signup btn-sm">Sign Up</a>
+                        <a th:href="@{/login}" class="btn btn-nav-signin btn-sm me-2" th:text="#{nav.login}">Sign In</a>
+                        <a th:href="@{/register}" class="btn btn-nav-signup btn-sm" th:text="#{nav.register}">Sign Up</a>
                     </div>
                     <div sec:authorize="isAuthenticated()" class="d-flex align-items-center gap-3">
-                        <span class="user-greeting">Hi, <b sec:authentication="name">User</b></span>
-                        <button id="globalLogoutBtn" class="btn btn-logout btn-sm">Logout</button>
+                        <span class="user-greeting"><span th:text="#{nav.greeting}">Hi,</span> <b sec:authentication="name">User</b></span>
+                        <button id="globalLogoutBtn" class="btn btn-logout btn-sm" th:text="#{nav.logout}">Logout</button>
                     </div>
                 </div>
             </div>
@@ -97,61 +128,6 @@
     </nav>
 
     <script>
-        let isRefreshing = false;
-        let refreshSubscribers = [];
-
-        function subscribeTokenRefresh(cb) {
-            refreshSubscribers.push(cb);
-        }
-
-        function onRefreshed(success) {
-            refreshSubscribers.forEach(cb => cb(success));
-            refreshSubscribers = [];
-        }
-
-        async function apiFetch(url, options = {}) {
-            const response = await fetch(url, options);
-
-            if (response.status !== 401) {
-                return response;
-            }
-            console.log("Token expired, attempting refresh...");
-            if (!isRefreshing) {
-                isRefreshing = true;
-
-                let refreshOk;
-                try {
-                    const refreshRes = await fetch('/api/auth/refresh', { method: 'POST' });
-                    refreshOk = refreshRes.ok;
-                } catch (err) {
-                    refreshOk = false;
-                }
-
-                isRefreshing = false;
-
-                if (refreshOk) {
-                    onRefreshed(true);
-                    return await fetch(url, options);
-                } else {
-                    onRefreshed(false);
-                    fetch('/api/auth/logout', { method: 'DELETE' }).finally(() => {
-                        window.location.href = '/login?expired=true';
-                    });
-                    return response;
-                }
-            }
-
-            return new Promise((resolve, reject) => {
-                subscribeTokenRefresh(async (success) => {
-                    if (success) {
-                        resolve(await fetch(url, options));
-                    } else {
-                        reject(new Error('Session expired'));
-                    }
-                });
-            });
-        }
-
         const logoutBtn = document.getElementById('globalLogoutBtn');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', function () {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Travel Agency | Admin Panel</title>
+    <title th:text="#{app.title} + ' | ' + #{nav.admin}">Travel Agency | Admin Panel</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
@@ -71,21 +71,21 @@
 
 <div class="container mt-5">
     <div class="admin-header">
-        <h2 class="mb-0" style="color: #2d3748; font-weight: 600;">Admin Panel</h2>
+        <h2 class="mb-0" style="color: #2d3748; font-weight: 600;" th:text="#{nav.admin}">Admin Panel</h2>
     </div>
 
     <ul class="nav nav-pills mb-4" id="adminTabs" role="tablist">
         <li class="nav-item">
-            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-manage-v">Vouchers</button>
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-manage-v" th:text="#{admin.vouchers}">Vouchers</button>
         </li>
         <li class="nav-item">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-manage-u">Users</button>
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-manage-u" th:text="#{admin.users}">Users</button>
         </li>
         <li class="nav-item" sec:authorize="hasAuthority('voucher:create')">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-create-v">New Voucher</button>
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-create-v" th:text="#{admin.create.voucher}">New Voucher</button>
         </li>
         <li class="nav-item" sec:authorize="hasAuthority('user:create')">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-create-u">New User</button>
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-create-u" th:text="#{admin.create.user}">New User</button>
         </li>
     </ul>
 
@@ -228,31 +228,73 @@
         }
     }
 
-    document.getElementById('v-form')?.addEventListener('submit', async e => {
-        e.preventDefault();
-        const data = {
-            title: document.getElementById('v-title').value,
-            description: document.getElementById('v-desc').value,
-            price: parseFloat(document.getElementById('v-price').value),
-            tourType: document.getElementById('v-tourType').value,
-            status: document.getElementById('v-status').value,
-            hot: document.getElementById('v-hot').value === 'true',
-            transferType: document.getElementById('v-transfer').value,
-            hotelType: document.getElementById('v-hotel').value
-        };
+    const vForm = document.getElementById('v-form');
+    if (vForm) {
+        const vTitleInput = document.getElementById('v-title');
+        const vDescInput = document.getElementById('v-desc');
+        const vPriceInput = document.getElementById('v-price');
 
-        const res = await fetch('/api/vouchers', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+        function validateVoucherField(input) {
+            if (input.validity.valid) {
+                input.classList.remove('is-invalid');
+                input.classList.add('is-valid');
+                return true;
+            } else {
+                input.classList.remove('is-valid');
+                input.classList.add('is-invalid');
+                return false;
+            }
+        }
+
+        [vTitleInput, vDescInput, vPriceInput].forEach(input => {
+            input.addEventListener('blur', () => validateVoucherField(input));
+            input.addEventListener('input', () => {
+                if (input.classList.contains('is-invalid')) validateVoucherField(input);
+            });
         });
 
-        if (res.ok) {
-            location.reload();
-        } else {
-            alert('Failed to create voucher');
-        }
-    });
+        vForm.addEventListener('submit', async e => {
+            e.preventDefault();
+
+            const isTitleValid = validateVoucherField(vTitleInput);
+            const isDescValid = validateVoucherField(vDescInput);
+            const isPriceValid = validateVoucherField(vPriceInput);
+
+            if (!isTitleValid || !isDescValid || !isPriceValid) {
+                return;
+            }
+
+            const data = {
+                title: vTitleInput.value,
+                description: vDescInput.value,
+                price: parseFloat(vPriceInput.value),
+                tourType: document.getElementById('v-tourType').value,
+                status: document.getElementById('v-status').value,
+                hot: document.getElementById('v-hot').value === 'true',
+                transferType: document.getElementById('v-transfer').value,
+                hotelType: document.getElementById('v-hotel').value
+            };
+
+            const res = await fetch('/api/vouchers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (res.ok) {
+                location.reload();
+            } else {
+                const errorData = await res.json().catch(() => ({}));
+                let errorMsg = 'Failed to create voucher';
+                if (errorData.validationErrors && errorData.validationErrors.length > 0) {
+                    errorMsg = errorData.validationErrors.map(err => err.message).join(', ');
+                } else if (errorData.message) {
+                    errorMsg = errorData.message;
+                }
+                alert(errorMsg);
+            }
+        });
+    }
 
     document.getElementById('u-form')?.addEventListener('submit', async e => {
         e.preventDefault();

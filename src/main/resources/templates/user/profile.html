@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Travel Agency | My Profile</title>
+    <title th:text="#{app.title} + ' | ' + #{nav.profile}">Travel Agency | My Profile</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
@@ -87,10 +87,10 @@
                     <div class="profile-icon">
                         <i class="bi bi-person"></i>
                     </div>
-                    <h3 class="mt-3 mb-1" id="prof-username" style="color: #2d3748; font-weight: 600;">Loading...</h3>
+                    <h3 class="mt-3 mb-1" id="prof-username" style="color: #2d3748; font-weight: 600;" th:text="#{profile.loading}">Loading...</h3>
                     <p class="text-muted small" id="prof-phone"></p>
                     <div class="balance-box mt-4">
-                        <small class="d-block mb-1 opacity-75">My Balance</small>
+                        <small class="d-block mb-1 opacity-75" th:text="#{profile.balance}">My Balance</small>
                         <span class="h3 fw-bold" id="prof-balance">$0.00</span>
                     </div>
                 </div>
@@ -103,12 +103,12 @@
                     <ul class="nav nav-tabs border-0" id="orderTabs" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" id="cart-tab" data-bs-toggle="tab" data-bs-target="#cart" type="button" role="tab">
-                                <i class="bi bi-cart3 me-2"></i>Cart
+                                <i class="bi bi-cart3 me-2"></i><span th:text="#{profile.my.cart}">Cart</span>
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="confirmed-tab" data-bs-toggle="tab" data-bs-target="#confirmed" type="button" role="tab">
-                                <i class="bi bi-check-circle me-2"></i>Confirmed Orders
+                                <i class="bi bi-check-circle me-2"></i><span th:text="#{profile.confirmed.orders}">Confirmed Orders</span>
                             </button>
                         </li>
                     </ul>
@@ -127,7 +127,21 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
+<script th:inline="javascript">
+    const msgCartEmpty = /*[[#{cart.empty}]]*/ 'Your cart is empty';
+    const msgNoConfirmed = /*[[#{profile.no.confirmed}]]*/ 'No confirmed orders yet';
+    const msgNoPhone = /*[[#{profile.no.phone}]]*/ 'No phone provided';
+    const msgBtnConfirm = /*[[#{cart.confirm}]]*/ 'Confirm & Pay';
+    const msgBtnCancel = /*[[#{cart.cancel}]]*/ 'Remove';
+    const msgPaid = /*[[#{profile.paid}]]*/ 'Paid';
+
+    const msgConfirmPrompt = /*[[#{profile.confirm.prompt}]]*/ 'Confirm this order and proceed with payment?';
+    const msgConfirmSuccess = /*[[#{profile.confirm.success}]]*/ 'Order confirmed and paid successfully!';
+    const msgConfirmFailed = /*[[#{profile.confirm.failed}]]*/ 'Confirmation failed. Please check your balance.';
+    const msgCancelPrompt = /*[[#{profile.cancel.prompt}]]*/ 'Remove this tour from your cart?';
+    const msgCancelFailed = /*[[#{profile.cancel.failed}]]*/ 'Cancellation failed';
+    const msgNetworkErr = /*[[#{error.network}]]*/ 'Network error';
+
     document.addEventListener("DOMContentLoaded", loadProfile);
 
     async function loadProfile() {
@@ -137,7 +151,7 @@
             const user = await res.json();
 
             document.getElementById('prof-username').innerText = user.username;
-            document.getElementById('prof-phone').innerText = user.phoneNumber || 'No phone provided';
+            document.getElementById('prof-phone').innerText = user.phoneNumber || msgNoPhone;
             document.getElementById('prof-balance').innerText = `$${user.balance.toFixed(2)}`;
 
             renderVouchers(user.vouchers);
@@ -148,18 +162,17 @@
 
     function renderVouchers(vouchers) {
         if (!vouchers || vouchers.length === 0) {
-            document.getElementById('cart-list').innerHTML = '<p class="text-center text-muted py-4">Your cart is empty</p>';
-            document.getElementById('confirmed-list').innerHTML = '<p class="text-center text-muted py-4">No confirmed orders yet</p>';
+            document.getElementById('cart-list').innerHTML = `<p class="text-center text-muted py-4">${msgCartEmpty}</p>`;
+            document.getElementById('confirmed-list').innerHTML = `<p class="text-center text-muted py-4">${msgNoConfirmed}</p>`;
             return;
         }
 
         const pendingVouchers = vouchers.filter(v => v.status === 'PENDING');
         const confirmedVouchers = vouchers.filter(v => v.status === 'CONFIRMED');
 
-        // Render cart (pending orders)
         const cartList = document.getElementById('cart-list');
         if (pendingVouchers.length === 0) {
-            cartList.innerHTML = '<p class="text-center text-muted py-4">Your cart is empty</p>';
+            cartList.innerHTML = `<p class="text-center text-muted py-4">${msgCartEmpty}</p>`;
         } else {
             cartList.innerHTML = pendingVouchers.map(v => `
                 <div class="col-12">
@@ -177,11 +190,11 @@
                                 <div class="d-flex gap-2">
                                     <button class="btn btn-sm" style="background: #48bb78; color: white; border: none; border-radius: 8px; padding: 0.4rem 1rem; font-weight: 500;"
                                             onclick="confirmBooking('${v.id}')">
-                                        <i class="bi bi-check-lg me-1"></i>Confirm & Pay
+                                        <i class="bi bi-check-lg me-1"></i>${msgBtnConfirm}
                                     </button>
                                     <button class="btn btn-cancel btn-sm"
                                             onclick="cancelBooking('${v.id}')">
-                                        <i class="bi bi-trash me-1"></i>Remove
+                                        <i class="bi bi-trash me-1"></i>${msgBtnCancel}
                                     </button>
                                 </div>
                             </div>
@@ -191,10 +204,9 @@
             `).join('');
         }
 
-        // Render confirmed orders
         const confirmedList = document.getElementById('confirmed-list');
         if (confirmedVouchers.length === 0) {
-            confirmedList.innerHTML = '<p class="text-center text-muted py-4">No confirmed orders yet</p>';
+            confirmedList.innerHTML = `<p class="text-center text-muted py-4">${msgNoConfirmed}</p>`;
         } else {
             confirmedList.innerHTML = confirmedVouchers.map(v => `
                 <div class="col-12">
@@ -203,7 +215,7 @@
                             <div class="flex-grow-1">
                                 <h6 class="fw-semibold mb-2" style="color: #2d3748;">
                                     ${v.title}
-                                    <span class="badge ms-2" style="background: #48bb78; color: white;">Paid</span>
+                                    <span class="badge ms-2" style="background: #48bb78; color: white;">${msgPaid}</span>
                                 </h6>
                                 <div class="small text-muted">
                                     <span><i class="bi bi-calendar3"></i> ${v.arrivalDate} - ${v.evictionDate}</span>
@@ -221,7 +233,7 @@
     }
 
     async function confirmBooking(voucherId) {
-        if (!confirm('Confirm this order and proceed with payment?')) return;
+        if (!confirm(msgConfirmPrompt)) return;
 
         try {
             const res = await fetch(`/api/vouchers/${voucherId}/confirm`, {
@@ -230,18 +242,18 @@
 
             if (res.ok) {
                 await loadProfile();
-                alert('Order confirmed and paid successfully!');
+                alert(msgConfirmSuccess);
             } else {
                 const error = await res.json().catch(() => ({}));
-                alert(error.message || 'Confirmation failed. Please check your balance.');
+                alert(error.message || msgConfirmFailed);
             }
         } catch (err) {
-            alert('Network error');
+            alert(msgNetworkErr);
         }
     }
 
     async function cancelBooking(voucherId) {
-        if (!confirm('Remove this tour from your cart?')) return;
+        if (!confirm(msgCancelPrompt)) return;
 
         try {
             const res = await fetch(`/api/vouchers/${voucherId}/cancel`, {
@@ -251,10 +263,10 @@
             if (res.ok) {
                 await loadProfile();
             } else {
-                alert('Cancellation failed');
+                alert(msgCancelFailed);
             }
         } catch (err) {
-            alert('Network error');
+            alert(msgNetworkErr);
         }
     }
 </script>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Travel Agency | Sign Up</title>
+  <title th:text="#{app.title} + ' | ' + #{auth.signup.title}">Travel Agency | Sign Up</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
@@ -61,40 +61,43 @@
   <div class="row justify-content-center">
     <div class="col-md-5">
       <div class="auth-card shadow-lg p-5">
-        <h2 class="auth-header text-center mb-2">Create Account</h2>
-        <p class="text-center text-muted mb-4 small">Join our travel community today</p>
+        <h2 class="auth-header text-center mb-2" th:text="#{auth.signup.title}">Create Account</h2>
+        <p class="text-center text-muted mb-4 small" th:text="#{auth.signup.subtitle}">Join our travel community today</p>
 
-        <form id="registerForm">
+        <form id="registerForm" novalidate>
           <div class="mb-3">
-            <label for="username" class="form-label">Username</label>
+            <label for="username" class="form-label" th:text="#{auth.username}">Username</label>
             <input type="text" class="form-control" id="username"
-                   placeholder="3 to 20 characters" required minlength="3" maxlength="20">
-            <div class="form-text">Choose a unique name for your profile</div>
+                   th:placeholder="#{auth.username}" required minlength="3" maxlength="20">
+            <div class="invalid-feedback" th:text="#{validation.username.size}">Username must be between 3 and 20 characters</div>
+            <div class="form-text" th:text="#{auth.username.help}">Choose a unique name for your profile</div>
           </div>
 
           <div class="mb-3">
-            <label for="phoneNumber" class="form-label">Phone Number</label>
+            <label for="phoneNumber" class="form-label" th:text="#{auth.phone}">Phone Number</label>
             <input type="tel" class="form-control" id="phoneNumber"
-                   placeholder="+380..." required>
+                   placeholder="+380..." required pattern="^\+?[0-9]{10,15}$">
+            <div class="invalid-feedback" th:text="#{validation.phone.invalid}">Please enter a valid phone number (10-15 digits)</div>
           </div>
 
           <div class="mb-4">
-            <label for="password" class="form-label">Password</label>
+            <label for="password" class="form-label" th:text="#{auth.password}">Password</label>
             <input type="password" class="form-control" id="password"
-                   placeholder="At least 6 characters" required minlength="6">
+                   th:placeholder="#{auth.password}" required minlength="6">
+            <div class="invalid-feedback" th:text="#{validation.password.size}">Password must be at least 6 characters long</div>
           </div>
 
           <div id="error-box" class="alert alert-danger d-none" role="alert"></div>
-          <div id="success-box" class="alert alert-success d-none" role="alert">
+          <div id="success-box" class="alert alert-success d-none" role="alert" th:text="#{auth.signup.success}">
             Registration successful! Redirecting to login page...
           </div>
 
-          <button type="submit" class="btn btn-signup text-white w-100">Sign Up</button>
+          <button type="submit" class="btn btn-signup text-white w-100" th:text="#{auth.signup.button}">Sign Up</button>
         </form>
 
         <div class="text-center mt-4">
-          <span class="text-muted small">Already have an account?</span>
-          <a th:href="@{/login}" class="text-decoration-none small fw-semibold ms-1" style="color: #667eea;">Sign In</a>
+          <span class="text-muted small" th:text="#{auth.have.account}">Already have an account?</span>
+          <a th:href="@{/login}" class="text-decoration-none small fw-semibold ms-1" style="color: #667eea;" th:text="#{auth.signin.button}">Sign In</a>
         </div>
       </div>
     </div>
@@ -104,12 +107,53 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-  document.getElementById('registerForm').addEventListener('submit', function(e) {
+  const form = document.getElementById('registerForm');
+  const usernameInput = document.getElementById('username');
+  const phoneInput = document.getElementById('phoneNumber');
+  const passwordInput = document.getElementById('password');
+
+  // Real-time validation
+  function validateField(input) {
+    if (input.validity.valid) {
+      input.classList.remove('is-invalid');
+      input.classList.add('is-valid');
+      return true;
+    } else {
+      input.classList.remove('is-valid');
+      input.classList.add('is-invalid');
+      return false;
+    }
+  }
+
+  usernameInput.addEventListener('blur', () => validateField(usernameInput));
+  phoneInput.addEventListener('blur', () => validateField(phoneInput));
+  passwordInput.addEventListener('blur', () => validateField(passwordInput));
+
+  usernameInput.addEventListener('input', () => {
+    if (usernameInput.classList.contains('is-invalid')) validateField(usernameInput);
+  });
+  phoneInput.addEventListener('input', () => {
+    if (phoneInput.classList.contains('is-invalid')) validateField(phoneInput);
+  });
+  passwordInput.addEventListener('input', () => {
+    if (passwordInput.classList.contains('is-invalid')) validateField(passwordInput);
+  });
+
+  form.addEventListener('submit', function(e) {
     e.preventDefault();
 
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-    const phoneNumber = document.getElementById('phoneNumber').value;
+    // Validate all fields
+    const isUsernameValid = validateField(usernameInput);
+    const isPhoneValid = validateField(phoneInput);
+    const isPasswordValid = validateField(passwordInput);
+
+    if (!isUsernameValid || !isPhoneValid || !isPasswordValid) {
+      return;
+    }
+
+    const username = usernameInput.value;
+    const password = passwordInput.value;
+    const phoneNumber = phoneInput.value;
 
     const errorBox = document.getElementById('error-box');
     const successBox = document.getElementById('success-box');
@@ -130,13 +174,24 @@
     })
             .then(async response => {
               if (response.ok) {
+                usernameInput.classList.remove('is-valid', 'is-invalid');
+                phoneInput.classList.remove('is-valid', 'is-invalid');
+                passwordInput.classList.remove('is-valid', 'is-invalid');
                 successBox.classList.remove('d-none');
                 setTimeout(() => {
                   window.location.href = '/login';
                 }, 2000);
               } else {
                 const data = await response.json();
-                errorBox.innerText = data.message || 'Registration failed. Try another username.';
+                let errorMessage = 'Registration failed. Try another username.';
+
+                if (data.validationErrors && data.validationErrors.length > 0) {
+                  errorMessage = data.validationErrors.map(err => err.message).join('<br>');
+                } else if (data.message) {
+                  errorMessage = data.message;
+                }
+
+                errorBox.innerHTML = errorMessage;
                 errorBox.classList.remove('d-none');
               }
             })
