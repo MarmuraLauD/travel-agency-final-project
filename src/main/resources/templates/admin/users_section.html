@@ -81,7 +81,7 @@
                 <input type="text" id="u-phone" class="form-control" style="border-radius: 8px; border: 1px solid #e2e8f0;" required>
             </div>
             <div class="row mb-3">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <label class="form-label fw-semibold" style="color: #4a5568;" th:text="#{table.role}">Role</label>
                     <select id="u-role" class="form-select" style="border-radius: 8px; border: 1px solid #e2e8f0;">
                         <option value="USER">User</option>
@@ -89,7 +89,11 @@
                         <option value="ADMIN">Admin</option>
                     </select>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold" style="color: #4a5568;" th:text="#{table.balance}">Balance</label>
+                    <input type="number" step="0.01" id="u-balance" class="form-control" style="border-radius: 8px; border: 1px solid #e2e8f0;" value="0" required>
+                </div>
+                <div class="col-md-4">
                     <label class="form-label fw-semibold" style="color: #4a5568;" th:text="#{table.status}">Active</label>
                     <select id="u-active" class="form-select" style="border-radius: 8px; border: 1px solid #e2e8f0;">
                         <option value="true">Active</option>
