@@ -6,12 +6,14 @@ import com.epam.finaltask.mapper.VoucherMapper;
 import com.epam.finaltask.model.*;
 import com.epam.finaltask.repository.UserRepository;
 import com.epam.finaltask.repository.VoucherRepository;
+import com.epam.finaltask.specification.VoucherSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -44,22 +46,14 @@ public class VoucherServiceImpl implements VoucherService {
     @Override
     @Transactional
     public VoucherDTO order(String id, String userId, LocalDate arrivalDate) {
-        log.info("User ID: {} is attempting to buy Voucher ID: {}", userId, id);
+        log.info("User ID: {} is attempting to add Voucher ID: {} to cart", userId, id);
 
         User user = userRepository.findById(UUID.fromString(userId))
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
         Voucher voucher = voucherRepository.findById(UUID.fromString(id))
                 .orElseThrow(() -> new EntityNotFoundException("Voucher not found"));
 
-        BigDecimal price = BigDecimal.valueOf(voucher.getPrice());
-        BigDecimal balance = user.getBalance();
-
-        if (balance.compareTo(price) < 0) {
-            throw new InsufficientFundsException(price.subtract(balance).doubleValue());
-        }
-        user.setBalance(balance.subtract(price));
-
-        voucher.setStatus(VoucherStatus.PAID);
+        voucher.setStatus(VoucherStatus.PENDING);
         voucher.setArrivalDate(arrivalDate);
         voucher.setEvictionDate(arrivalDate.plusDays(7));
 
@@ -73,7 +67,41 @@ public class VoucherServiceImpl implements VoucherService {
         userRepository.save(user);
         Voucher savedVoucher = voucherRepository.save(voucher);
 
-        log.info("Voucher ID: {} successfully purchased by User ID: {}", id, userId);
+        log.info("Voucher ID: {} successfully added to cart by User ID: {}", id, userId);
+        return voucherMapper.toVoucherDTO(savedVoucher);
+    }
+
+    @Override
+    @Transactional
+    public VoucherDTO confirmOrder(UUID voucherId) {
+        log.info("Attempting to confirm Voucher ID: {}", voucherId);
+
+        Voucher voucher = voucherRepository.findById(voucherId)
+                .orElseThrow(() -> new EntityNotFoundException("Voucher not found"));
+
+        if (voucher.getStatus() != VoucherStatus.PENDING) {
+            throw new RuntimeException("Only pending vouchers can be confirmed");
+        }
+
+        User user = voucher.getUser();
+        if (user == null) {
+            throw new RuntimeException("Voucher has no associated user");
+        }
+
+        BigDecimal price = BigDecimal.valueOf(voucher.getPrice());
+        BigDecimal balance = user.getBalance();
+
+        if (balance.compareTo(price) < 0) {
+            throw new InsufficientFundsException(price.subtract(balance).doubleValue());
+        }
+
+        user.setBalance(balance.subtract(price));
+        voucher.setStatus(VoucherStatus.CONFIRMED);
+
+        userRepository.save(user);
+        Voucher savedVoucher = voucherRepository.save(voucher);
+
+        log.info("Voucher ID: {} successfully confirmed and paid", voucherId);
         return voucherMapper.toVoucherDTO(savedVoucher);
     }
 
@@ -110,13 +138,13 @@ public class VoucherServiceImpl implements VoucherService {
         Voucher voucher = voucherRepository.findById(voucherId)
                 .orElseThrow(() -> new EntityNotFoundException("Voucher not found"));
 
-        if (voucher.getStatus() != VoucherStatus.PAID) {
-            throw new RuntimeException("Only paid vouchers can be canceled");
+        if (voucher.getStatus() != VoucherStatus.PENDING) {
+            throw new RuntimeException("Only pending vouchers can be canceled");
         }
 
         User user = voucher.getUser();
         if (user != null) {
-            user.setBalance(user.getBalance().add(BigDecimal.valueOf(voucher.getPrice())));
+            user.getVouchers().remove(voucher);
             userRepository.save(user);
         }
 
