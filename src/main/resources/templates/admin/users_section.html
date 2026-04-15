@@ -1,14 +1,14 @@
 <div xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:fragment="users">
-    <div class="card shadow-sm border-0">
-        <div class="card-body p-0">
+    <div class="admin-card">
+        <div class="table-responsive">
             <table class="table table-hover mb-0">
-                <thead class="table-light">
+                <thead style="background: #f8f9fa; border-bottom: 2px solid #e2e8f0;">
                 <tr>
-                    <th>Username</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Balance</th>
-                    <th>Actions</th>
+                    <th style="color: #2d3748; font-weight: 600;">Username</th>
+                    <th style="color: #2d3748; font-weight: 600;">Role</th>
+                    <th style="color: #2d3748; font-weight: 600;">Status</th>
+                    <th style="color: #2d3748; font-weight: 600;">Balance</th>
+                    <th style="color: #2d3748; font-weight: 600;">Actions</th>
                 </tr>
                 </thead>
                 <tbody id="admin-users-list"></tbody>
@@ -18,40 +18,86 @@
 
     <div class="modal fade" id="editUserModal" tabindex="-1">
         <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header"><h5>Edit User</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-                <div class="modal-body">
+            <div class="modal-content" style="border: none; border-radius: 16px; overflow: hidden;">
+                <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">
+                    <h5 class="modal-title">Edit User</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
                     <input type="hidden" id="edit-u-id">
                     <input type="hidden" id="edit-u-original-username">
                     <input type="hidden" id="edit-u-original-role">
-                    <div class="mb-3"><label>Username</label><input type="text" id="edit-u-username" class="form-control"></div>
-                    <div class="mb-3"><label>Phone</label><input type="text" id="edit-u-phone" class="form-control"></div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" style="color: #4a5568;">Username</label>
+                        <input type="text" id="edit-u-username" class="form-control" style="border-radius: 8px; border: 1px solid #e2e8f0;">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" style="color: #4a5568;">Phone</label>
+                        <input type="text" id="edit-u-phone" class="form-control" style="border-radius: 8px; border: 1px solid #e2e8f0;">
+                    </div>
                     <div class="row mb-3">
-                        <div class="col-md-6"><label>Balance</label><input type="number" step="0.01" id="edit-u-balance" class="form-control"></div>
-                        <div class="col-md-6"><label>Active</label><select id="edit-u-active" class="form-select"><option value="true">Active</option><option value="false">Passive</option></select></div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" style="color: #4a5568;">Balance</label>
+                            <input type="number" step="0.01" id="edit-u-balance" class="form-control" style="border-radius: 8px; border: 1px solid #e2e8f0;">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" style="color: #4a5568;">Active</label>
+                            <select id="edit-u-active" class="form-select" style="border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <option value="true">Active</option>
+                                <option value="false">Passive</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="mb-3" sec:authorize="hasAuthority('user:create')">
-                        <label>Role</label>
-                        <select id="edit-u-role" class="form-select"><option value="USER">User</option><option value="MANAGER">Manager</option><option value="ADMIN">Admin</option></select>
+                        <label class="form-label fw-semibold" style="color: #4a5568;">Role</label>
+                        <select id="edit-u-role" class="form-select" style="border-radius: 8px; border: 1px solid #e2e8f0;">
+                            <option value="USER">User</option>
+                            <option value="MANAGER">Manager</option>
+                            <option value="ADMIN">Admin</option>
+                        </select>
                     </div>
                 </div>
-                <div class="modal-footer"><button type="button" class="btn btn-primary" onclick="saveUserChanges()">Save</button></div>
+                <div class="modal-footer" style="background: #f8f9fa; border: none;">
+                    <button type="button" class="btn" style="background: #667eea; color: white; border: none; border-radius: 8px; padding: 0.5rem 1.5rem;" onclick="saveUserChanges()">Save</button>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <div xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:fragment="create-user-form">
-    <div class="card shadow-sm border-0 p-4">
+    <div class="admin-card p-4">
         <form id="u-form">
-            <div class="mb-3"><label>Username</label><input type="text" id="u-username" class="form-control" required></div>
-            <div class="mb-3"><label>Password</label><input type="password" id="u-password" class="form-control" required></div>
-            <div class="mb-3"><label>Phone</label><input type="text" id="u-phone" class="form-control" required></div>
-            <div class="row mb-3">
-                <div class="col-md-6"><label>Role</label><select id="u-role" class="form-select"><option value="USER">User</option><option value="MANAGER">Manager</option><option value="ADMIN">Admin</option></select></div>
-                <div class="col-md-6"><label>Active</label><select id="u-active" class="form-select"><option value="true">Active</option><option value="false">Passive</option></select></div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold" style="color: #4a5568;">Username</label>
+                <input type="text" id="u-username" class="form-control" style="border-radius: 8px; border: 1px solid #e2e8f0;" required>
             </div>
-            <button type="submit" class="btn btn-success w-100">Create User</button>
+            <div class="mb-3">
+                <label class="form-label fw-semibold" style="color: #4a5568;">Password</label>
+                <input type="password" id="u-password" class="form-control" style="border-radius: 8px; border: 1px solid #e2e8f0;" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold" style="color: #4a5568;">Phone</label>
+                <input type="text" id="u-phone" class="form-control" style="border-radius: 8px; border: 1px solid #e2e8f0;" required>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold" style="color: #4a5568;">Role</label>
+                    <select id="u-role" class="form-select" style="border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <option value="USER">User</option>
+                        <option value="MANAGER">Manager</option>
+                        <option value="ADMIN">Admin</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold" style="color: #4a5568;">Active</label>
+                    <select id="u-active" class="form-select" style="border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <option value="true">Active</option>
+                        <option value="false">Passive</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="btn w-100" style="background: #667eea; color: white; border: none; border-radius: 8px; padding: 0.75rem; font-weight: 500;">Create User</button>
         </form>
     </div>
 </div>
