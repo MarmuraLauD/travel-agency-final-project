@@ -36,6 +36,7 @@ public class Voucher {
     private HotelType hotelType;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 20)
     private VoucherStatus status;
 
     private LocalDate arrivalDate;
