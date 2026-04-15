@@ -93,7 +93,8 @@ public class VoucherRestController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id,asc") String[] sort,
-            @RequestParam(required = false) String status) {
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "false") boolean hotOnly) {
 
         Sort.Direction direction = sort[1].equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort[0]));
@@ -101,9 +102,18 @@ public class VoucherRestController {
         Page<VoucherDTO> pageTours;
 
         if ("ALL".equals(status)) {
-            pageTours = voucherService.findAll(pageable);
+            if (hotOnly) {
+                pageTours = voucherService.findAllByHot(pageable);
+            } else {
+                pageTours = voucherService.findAll(pageable);
+            }
         } else {
-            pageTours = voucherService.findAllByStatus("REGISTERED", pageable);
+            String filterStatus = (status == null) ? "REGISTERED" : status;
+            if (hotOnly) {
+                pageTours = voucherService.findAllByStatusAndHot(filterStatus, true, pageable);
+            } else {
+                pageTours = voucherService.findAllByStatus(filterStatus, pageable);
+            }
         }
 
         Map<String, Object> response = new HashMap<>();
@@ -113,6 +123,7 @@ public class VoucherRestController {
         response.put("totalPages", pageTours.getTotalPages());
         response.put("sortField", sort[0]);
         response.put("sortDir", sort[1]);
+        response.put("hotOnly", hotOnly);
 
         return ResponseEntity.ok(response);
     }
