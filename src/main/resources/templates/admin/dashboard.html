@@ -20,16 +20,17 @@
         .nav-pills .nav-link {
             border-radius: 10px;
             padding: 0.75rem 1.5rem;
-            color: #4a5568;
+            color: #4a5568; !important;
             font-weight: 500;
             transition: all 0.2s;
         }
         .nav-pills .nav-link:hover {
-            background: #f7fafc;
+            background: #f7fafc; !important;
+            color: #667eea !important;
         }
         .nav-pills .nav-link.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); !important;
+            color: #ffffff; !important;
         }
         .sort-header {
             cursor: pointer;
@@ -63,6 +64,24 @@
             border: none;
             color: #4a5568;
             min-width: 70px;
+        }
+        .pagination .page-link {
+            color: #667eea;
+            border-color: #e2e8f0;
+        }
+        .pagination .page-link:hover {
+            color: #ffffff;
+            background-color: #667eea;
+            border-color: #667eea;
+        }
+        .pagination .page-item.active .page-link {
+            background-color: #667eea;
+            border-color: #667eea;
+            color: #ffffff;
+        }
+        .pagination .page-item.disabled .page-link {
+            color: #a0aec0;
+            background-color: transparent;
         }
     </style>
 </head>
@@ -115,6 +134,12 @@
     let currentVouchers = [];
     let currentUsers = [];
     let vSort = { field: 'id', dir: 'asc' };
+    let vPage = { current: 0, size: 10, total: 0, totalPages: 0 };
+    let vFilters = { search: '', status: 'ALL', tourType: 'ALL', transferType: 'ALL', hotelType: 'ALL' };
+
+    let uSort = { field: 'username', dir: 'asc' };
+    let uPage = { current: 0, size: 10, total: 0, totalPages: 0 };
+    let uFilters = { search: '', role: 'ALL', status: 'ALL' };
 
     const canDeleteV = document.body.getAttribute('data-can-delete-v') === 'true';
     const canDeleteU = document.body.getAttribute('data-can-delete-u') === 'true';
@@ -122,15 +147,103 @@
     document.addEventListener("DOMContentLoaded", () => {
         loadVouchers();
         loadUsers();
+
+        // Voucher search and filters
+        let vSearchTimeout;
+        document.getElementById('voucher-search')?.addEventListener('input', (e) => {
+            clearTimeout(vSearchTimeout);
+            vSearchTimeout = setTimeout(() => {
+                vFilters.search = e.target.value;
+                vPage.current = 0;
+                loadVouchers();
+            }, 300);
+        });
+
+        document.getElementById('voucher-status-filter')?.addEventListener('change', (e) => {
+            vFilters.status = e.target.value;
+            vPage.current = 0;
+            loadVouchers();
+        });
+
+        document.getElementById('voucher-tourtype-filter')?.addEventListener('change', (e) => {
+            vFilters.tourType = e.target.value;
+            vPage.current = 0;
+            loadVouchers();
+        });
+
+        document.getElementById('voucher-transfer-filter')?.addEventListener('change', (e) => {
+            vFilters.transferType = e.target.value;
+            vPage.current = 0;
+            loadVouchers();
+        });
+
+        document.getElementById('voucher-hotel-filter')?.addEventListener('change', (e) => {
+            vFilters.hotelType = e.target.value;
+            vPage.current = 0;
+            loadVouchers();
+        });
+
+        // User search and filters
+        let uSearchTimeout;
+        document.getElementById('user-search')?.addEventListener('input', (e) => {
+            clearTimeout(uSearchTimeout);
+            uSearchTimeout = setTimeout(() => {
+                uFilters.search = e.target.value;
+                uPage.current = 0;
+                loadUsers();
+            }, 300);
+        });
+
+        document.getElementById('user-role-filter')?.addEventListener('change', (e) => {
+            uFilters.role = e.target.value;
+            uPage.current = 0;
+            loadUsers();
+        });
+
+        document.getElementById('user-status-filter')?.addEventListener('change', (e) => {
+            uFilters.status = e.target.value;
+            uPage.current = 0;
+            loadUsers();
+        });
     });
 
 
     function loadVouchers() {
-        fetch(`/api/vouchers?size=100&status=ALL&sort=${vSort.field},${vSort.dir}`)
+        const params = new URLSearchParams({
+            page: vPage.current,
+            size: vPage.size,
+            status: vFilters.status,
+            sort: `${vSort.field},${vSort.dir}`
+        });
+
+        if (vFilters.search) {
+            params.append('search', vFilters.search);
+        }
+
+        if (vFilters.tourType && vFilters.tourType !== 'ALL') {
+            params.append('tourType', vFilters.tourType);
+        }
+
+        if (vFilters.transferType && vFilters.transferType !== 'ALL') {
+            params.append('transferType', vFilters.transferType);
+        }
+
+        if (vFilters.hotelType && vFilters.hotelType !== 'ALL') {
+            params.append('hotelType', vFilters.hotelType);
+        }
+
+        fetch(`/api/vouchers?${params}`)
             .then(res => res.json())
             .then(data => {
+                console.log('Vouchers API response:', data);
                 currentVouchers = data.vouchers || [];
+                vPage.total = data.totalElements || 0;
+                vPage.totalPages = data.totalPages || 0;
+                vPage.current = data.currentPage || 0;
+                console.log('vPage after update:', vPage);
+                console.log('currentVouchers count:', currentVouchers.length);
                 renderVouchers();
+                renderVoucherPagination();
             });
     }
 
@@ -144,6 +257,11 @@
         const list = document.getElementById('admin-vouchers-list');
         if (!list) return;
 
+        if (currentVouchers.length === 0) {
+            list.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No vouchers found</td></tr>';
+            return;
+        }
+
         list.innerHTML = currentVouchers.map(v => {
             const isHot = v.hot === true || String(v.hot) === 'true';
 
@@ -151,6 +269,8 @@
                 <tr>
                     <td class="fw-semibold" style="color: #2d3748;">${v.title}</td>
                     <td><span class="badge" style="background: #e2e8f0; color: #4a5568;">${v.tourType}</span></td>
+                    <td><span class="badge" style="background: #fef3c7; color: #92400e;">${v.transferType}</span></td>
+                    <td><span class="badge" style="background: #dbeafe; color: #1e40af;">${v.hotelType}</span></td>
                     <td style="color: #667eea; font-weight: 600;">$${v.price.toFixed(2)}</td>
                     <td><span class="badge" style="background: #bee3f8; color: #2c5aa0;">${v.status}</span></td>
                     <td>
@@ -159,10 +279,69 @@
                             <i class="bi bi-fire"></i> ${isHot ? 'HOT' : 'OFF'}
                         </button>
                         <button class="btn btn-sm btn-action me-1" style="background: #667eea; color: white; border: none;" onclick="openEditVoucher('${v.id}')">Edit</button>
-                        ${canDeleteV ? `<button class="btn btn-sm btn-action" style="background: #fc8181; color: white; border: none;" onclick="deleteVoucher('${v.id}')">Del</button>` : ''}
+                        ${canDeleteV ? `<button class="btn btn-sm btn-action" style="background: #fc8181; color: white; border: none;" onclick="deleteVoucher('${v.id}')">Delete</button>` : ''}
                     </td>
                 </tr>`;
         }).join('');
+    }
+
+    function renderVoucherPagination() {
+        const infoEl = document.getElementById('voucher-page-info');
+        const paginationEl = document.getElementById('voucher-pagination');
+
+        if (!infoEl || !paginationEl) return;
+
+        console.log('renderVoucherPagination - vPage.total:', vPage.total, 'currentVouchers.length:', currentVouchers.length);
+
+        if (vPage.total === 0 && currentVouchers.length === 0) {
+            console.log('No data, showing 0');
+            infoEl.textContent = '0';
+            paginationEl.innerHTML = '';
+            return;
+        }
+
+        const start = vPage.current * vPage.size + 1;
+        const end = Math.min((vPage.current + 1) * vPage.size, vPage.total);
+        const text = `${start}-${end} of ${vPage.total}`;
+        console.log('Pagination text:', text);
+        infoEl.textContent = text;
+
+        if (vPage.totalPages <= 1) {
+            paginationEl.innerHTML = '';
+            return;
+        }
+
+        let html = '';
+
+        // Previous button
+        html += `<li class="page-item ${vPage.current === 0 ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="changeVoucherPage(${vPage.current - 1}); return false;">Previous</a>
+        </li>`;
+
+        // Page numbers
+        for (let i = 0; i < vPage.totalPages; i++) {
+            if (i === 0 || i === vPage.totalPages - 1 || Math.abs(i - vPage.current) <= 2) {
+                html += `<li class="page-item ${i === vPage.current ? 'active' : ''}">
+                    <a class="page-link" href="#" onclick="changeVoucherPage(${i}); return false;">${i + 1}</a>
+                </li>`;
+            } else if (Math.abs(i - vPage.current) === 3) {
+                html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+            }
+        }
+
+        // Next button
+        html += `<li class="page-item ${vPage.current === vPage.totalPages - 1 ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="changeVoucherPage(${vPage.current + 1}); return false;">Next</a>
+        </li>`;
+
+        paginationEl.innerHTML = html;
+    }
+
+    function changeVoucherPage(page) {
+        if (page >= 0 && page < vPage.totalPages) {
+            vPage.current = page;
+            loadVouchers();
+        }
     }
 
     async function toggleHotStatus(id) {
@@ -194,17 +373,70 @@
 
 
     function loadUsers() {
-        fetch('/api/users')
+        const params = new URLSearchParams({
+            page: uPage.current,
+            size: uPage.size
+        });
+
+        fetch(`/api/users?${params}`)
             .then(res => res.json())
-            .then(users => {
-                currentUsers = users || [];
+            .then(data => {
+                let users = Array.isArray(data) ? data : (data.content || data.users || []);
+
+                // Apply client-side filtering and sorting
+                if (uFilters.search) {
+                    const searchLower = uFilters.search.toLowerCase();
+                    users = users.filter(u => u.username.toLowerCase().includes(searchLower));
+                }
+
+                if (uFilters.role !== 'ALL') {
+                    users = users.filter(u => u.role === 'ROLE_' + uFilters.role || u.role === uFilters.role);
+                }
+
+                if (uFilters.status !== 'ALL') {
+                    const isActive = uFilters.status === 'true';
+                    users = users.filter(u => u.active === isActive);
+                }
+
+                // Sorting
+                users.sort((a, b) => {
+                    let aVal = a[uSort.field];
+                    let bVal = b[uSort.field];
+
+                    if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+                    if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+
+                    if (aVal < bVal) return uSort.dir === 'asc' ? -1 : 1;
+                    if (aVal > bVal) return uSort.dir === 'asc' ? 1 : -1;
+                    return 0;
+                });
+
+                // Pagination
+                uPage.total = users.length;
+                uPage.totalPages = Math.ceil(users.length / uPage.size);
+                const start = uPage.current * uPage.size;
+                const end = start + uPage.size;
+                currentUsers = users.slice(start, end);
+
                 renderUsers();
+                renderUserPagination();
             });
+    }
+
+    function sortUsers(field) {
+        uSort.dir = (uSort.field === field && uSort.dir === 'asc') ? 'desc' : 'asc';
+        uSort.field = field;
+        loadUsers();
     }
 
     function renderUsers() {
         const list = document.getElementById('admin-users-list');
         if (!list) return;
+
+        if (currentUsers.length === 0) {
+            list.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No users found</td></tr>';
+            return;
+        }
 
         list.innerHTML = currentUsers.map(u => `
             <tr>
@@ -218,9 +450,57 @@
                 <td style="color: #667eea; font-weight: 600;">$${(u.balance || 0).toFixed(2)}</td>
                 <td>
                     <button class="btn btn-sm btn-action me-1" style="background: #667eea; color: white; border: none;" onclick="openEditUser('${u.id}')">Edit</button>
-                    ${canDeleteU ? `<button class="btn btn-sm btn-action" style="background: #fc8181; color: white; border: none;" onclick="deleteUser('${u.id}')">Del</button>` : ''}
+                    ${canDeleteU ? `<button class="btn btn-sm btn-action" style="background: #fc8181; color: white; border: none;" onclick="deleteUser('${u.id}')">Delete</button>` : ''}
                 </td>
             </tr>`).join('');
+    }
+
+    function renderUserPagination() {
+        const infoEl = document.getElementById('user-page-info');
+        const paginationEl = document.getElementById('user-pagination');
+
+        if (!infoEl || !paginationEl) return;
+
+        const start = uPage.current * uPage.size + 1;
+        const end = Math.min((uPage.current + 1) * uPage.size, uPage.total);
+        infoEl.textContent = uPage.total > 0 ? `${start}-${end} of ${uPage.total}` : '0';
+
+        if (uPage.totalPages <= 1) {
+            paginationEl.innerHTML = '';
+            return;
+        }
+
+        let html = '';
+
+        // Previous button
+        html += `<li class="page-item ${uPage.current === 0 ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="changeUserPage(${uPage.current - 1}); return false;">Previous</a>
+        </li>`;
+
+        // Page numbers
+        for (let i = 0; i < uPage.totalPages; i++) {
+            if (i === 0 || i === uPage.totalPages - 1 || Math.abs(i - uPage.current) <= 2) {
+                html += `<li class="page-item ${i === uPage.current ? 'active' : ''}">
+                    <a class="page-link" href="#" onclick="changeUserPage(${i}); return false;">${i + 1}</a>
+                </li>`;
+            } else if (Math.abs(i - uPage.current) === 3) {
+                html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+            }
+        }
+
+        // Next button
+        html += `<li class="page-item ${uPage.current === uPage.totalPages - 1 ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="changeUserPage(${uPage.current + 1}); return false;">Next</a>
+        </li>`;
+
+        paginationEl.innerHTML = html;
+    }
+
+    function changeUserPage(page) {
+        if (page >= 0 && page < uPage.totalPages) {
+            uPage.current = page;
+            loadUsers();
+        }
     }
 
     function deleteUser(id) {

@@ -32,7 +32,7 @@ public class UIController {
 
     @GetMapping("/dashboard")
     public String dashboard(@RequestParam(defaultValue = "0") int page,
-                            @RequestParam(defaultValue = "5") int size,
+                            @RequestParam(defaultValue = "10") int size,
                             @RequestParam(defaultValue = "title") String sortField,
                             @RequestParam(defaultValue = "asc") String sortDir,
                             @RequestParam(required = false) String search,

@@ -1,18 +1,98 @@
 <div xmlns:th="http://www.thymeleaf.org" th:fragment="vouchers">
     <div class="admin-card">
+        <div class="p-3">
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <div class="input-group">
+                        <span class="input-group-text" style="background: white; border-right: none;">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input type="text" id="voucher-search" class="form-control" th:placeholder="#{filter.search.title}" placeholder="Search by title..." style="border-left: none; border-radius: 0 8px 8px 0;">
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <select id="voucher-status-filter" class="form-select" style="border-radius: 8px;">
+                        <option value="ALL" th:text="#{filter.all.statuses}">All Statuses</option>
+                        <option value="REGISTERED" th:text="#{enum.status.registered}">Registered</option>
+                        <option value="PENDING" th:text="#{enum.status.pending}">Pending</option>
+                        <option value="CONFIRMED" th:text="#{enum.status.confirmed}">Confirmed</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="voucher-tourtype-filter" class="form-select" style="border-radius: 8px;">
+                        <option value="ALL" th:text="#{filter.tour.type}">All Tour Types</option>
+                        <option value="HEALTH" th:text="#{enum.tour.health}">Health</option>
+                        <option value="SPORTS" th:text="#{enum.tour.sports}">Sports</option>
+                        <option value="LEISURE" th:text="#{enum.tour.leisure}">Leisure</option>
+                        <option value="SAFARI" th:text="#{enum.tour.safari}">Safari</option>
+                        <option value="WINE" th:text="#{enum.tour.wine}">Wine</option>
+                        <option value="ECO" th:text="#{enum.tour.eco}">Eco</option>
+                        <option value="ADVENTURE" th:text="#{enum.tour.adventure}">Adventure</option>
+                        <option value="CULTURAL" th:text="#{enum.tour.cultural}">Cultural</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="voucher-transfer-filter" class="form-select" style="border-radius: 8px;">
+                        <option value="ALL" th:text="#{filter.transfer.type}">All Transfer Types</option>
+                        <option value="BUS" th:text="#{enum.trans.bus}">Bus</option>
+                        <option value="TRAIN" th:text="#{enum.trans.train}">Train</option>
+                        <option value="PLANE" th:text="#{enum.trans.plane}">Plane</option>
+                        <option value="SHIP" th:text="#{enum.trans.ship}">Ship</option>
+                        <option value="PRIVATE_CAR" th:text="#{enum.trans.private}">Private Car</option>
+                        <option value="JEEPS" th:text="#{enum.trans.jeeps}">Jeeps</option>
+                        <option value="MINIBUS" th:text="#{enum.trans.minibus}">Minibus</option>
+                        <option value="ELECTRICAL_CARS" th:text="#{enum.trans.electric}">Electrical Cars</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="voucher-hotel-filter" class="form-select" style="border-radius: 8px;">
+                        <option value="ALL" th:text="#{filter.hotel.type}">All Hotel Types</option>
+                        <option value="ONE_STAR" th:text="#{enum.hotel.1star}">⭐ 1 Star</option>
+                        <option value="TWO_STARS" th:text="#{enum.hotel.2star}">⭐⭐ 2 Stars</option>
+                        <option value="THREE_STARS" th:text="#{enum.hotel.3star}">⭐⭐⭐ 3 Stars</option>
+                        <option value="FOUR_STARS" th:text="#{enum.hotel.4star}">⭐⭐⭐⭐ 4 Stars</option>
+                        <option value="FIVE_STARS" th:text="#{enum.hotel.5star}">⭐⭐⭐⭐⭐ 5 Stars</option>
+                    </select>
+                </div>
+            </div>
+        </div>
         <div class="table-responsive">
             <table class="table table-hover mb-0">
                 <thead style="background: #f8f9fa; border-bottom: 2px solid #e2e8f0;">
                 <tr>
-                    <th class="sort-header" onclick="sortVouchers('title')" style="color: #2d3748; font-weight: 600;" th:text="#{table.title}">Title</th>
-                    <th class="sort-header" onclick="sortVouchers('tourType')" style="color: #2d3748; font-weight: 600;" th:text="#{table.type}">Type</th>
-                    <th class="sort-header" onclick="sortVouchers('price')" style="color: #2d3748; font-weight: 600;" th:text="#{table.price}">Price</th>
-                    <th style="color: #2d3748; font-weight: 600;" th:text="#{table.status}">Status</th>
+                    <th class="sort-header" onclick="sortVouchers('title')" style="color: #2d3748; font-weight: 600; cursor: pointer;" th:text="#{table.title}">
+                        Title <i class="bi bi-arrow-down-up ms-1"></i>
+                    </th>
+                    <th class="sort-header" onclick="sortVouchers('tourType')" style="color: #2d3748; font-weight: 600; cursor: pointer;" th:text="#{table.type}">
+                        Type <i class="bi bi-arrow-down-up ms-1"></i>
+                    </th>
+                    <th class="sort-header" onclick="sortVouchers('transferType')" style="color: #2d3748; font-weight: 600; cursor: pointer;" th:text="#{table.transfer}">
+                        Transfer <i class="bi bi-arrow-down-up ms-1"></i>
+                    </th>
+                    <th class="sort-header" onclick="sortVouchers('hotelType')" style="color: #2d3748; font-weight: 600; cursor: pointer;" th:text="#{table.hotel}">
+                        Hotel <i class="bi bi-arrow-down-up ms-1"></i>
+                    </th>
+                    <th class="sort-header" onclick="sortVouchers('price')" style="color: #2d3748; font-weight: 600; cursor: pointer;" th:text="#{table.price}">
+                        Price <i class="bi bi-arrow-down-up ms-1"></i>
+                    </th>
+                    <th class="sort-header" onclick="sortVouchers('status')" style="color: #2d3748; font-weight: 600; cursor: pointer;" th:text="#{table.status}">
+                        Status <i class="bi bi-arrow-down-up ms-1"></i>
+                    </th>
                     <th style="color: #2d3748; font-weight: 600;" th:text="#{table.actions}">Actions</th>
                 </tr>
                 </thead>
                 <tbody id="admin-vouchers-list"></tbody>
             </table>
+        </div>
+        <div class="p-3 d-flex justify-content-between align-items-center" id="voucher-pagination-container">
+            <div>
+                <span class="text-muted">Showing <span id="voucher-page-info">0</span></span>
+            </div>
+            <nav>
+                <ul class="pagination mb-0" id="voucher-pagination"></ul>
+            </nav>
         </div>
     </div>
 

@@ -1,18 +1,61 @@
 <div xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:fragment="users">
     <div class="admin-card">
+        <div class="p-3">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text" style="background: white; border-right: none;">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input type="text" id="user-search" class="form-control" th:placeholder="#{filter.search.username}" placeholder="Search by username..." style="border-left: none; border-radius: 0 8px 8px 0;">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select id="user-role-filter" class="form-select" style="border-radius: 8px;">
+                        <option value="ALL" th:text="#{filter.all.roles}">All Roles</option>
+                        <option value="USER" th:text="#{enum.role.user}">User</option>
+                        <option value="MANAGER" th:text="#{enum.role.manager}">Manager</option>
+                        <option value="ADMIN" th:text="#{enum.role.admin}">Admin</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="user-status-filter" class="form-select" style="border-radius: 8px;">
+                        <option value="ALL" th:text="#{filter.all.statuses}">All Statuses</option>
+                        <option value="true" th:text="#{enum.status.active}">Active</option>
+                        <option value="false" th:text="#{enum.status.passive}">Passive</option>
+                    </select>
+                </div>
+            </div>
+        </div>
         <div class="table-responsive">
             <table class="table table-hover mb-0">
                 <thead style="background: #f8f9fa; border-bottom: 2px solid #e2e8f0;">
                 <tr>
-                    <th style="color: #2d3748; font-weight: 600;" th:text="#{auth.username}">Username</th>
-                    <th style="color: #2d3748; font-weight: 600;" th:text="#{table.role}">Role</th>
-                    <th style="color: #2d3748; font-weight: 600;" th:text="#{table.status}">Status</th>
-                    <th style="color: #2d3748; font-weight: 600;" th:text="#{table.balance}">Balance</th>
+                    <th class="sort-header" onclick="sortUsers('username')" style="color: #2d3748; font-weight: 600; cursor: pointer;" th:text="#{auth.username}">
+                        Username <i class="bi bi-arrow-down-up ms-1"></i>
+                    </th>
+                    <th class="sort-header" onclick="sortUsers('role')" style="color: #2d3748; font-weight: 600; cursor: pointer;" th:text="#{table.role}">
+                        Role <i class="bi bi-arrow-down-up ms-1"></i>
+                    </th>
+                    <th class="sort-header" onclick="sortUsers('active')" style="color: #2d3748; font-weight: 600; cursor: pointer;" th:text="#{table.status}">
+                        Status <i class="bi bi-arrow-down-up ms-1"></i>
+                    </th>
+                    <th class="sort-header" onclick="sortUsers('balance')" style="color: #2d3748; font-weight: 600; cursor: pointer;" th:text="#{table.balance}">
+                        Balance <i class="bi bi-arrow-down-up ms-1"></i>
+                    </th>
                     <th style="color: #2d3748; font-weight: 600;" th:text="#{table.actions}">Actions</th>
                 </tr>
                 </thead>
                 <tbody id="admin-users-list"></tbody>
             </table>
+        </div>
+        <div class="p-3 d-flex justify-content-between align-items-center" id="user-pagination-container">
+            <div>
+                <span class="text-muted">Showing <span id="user-page-info">0</span></span>
+            </div>
+            <nav>
+                <ul class="pagination mb-0" id="user-pagination"></ul>
+            </nav>
         </div>
     </div>
 

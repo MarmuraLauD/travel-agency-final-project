@@ -4,8 +4,7 @@ A modern, full-stack web application for managing travel vouchers and tours buil
 
 ![Java](https://img.shields.io/badge/Java-17-orange?style=flat-square&logo=java)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.1-brightgreen?style=flat-square&logo=spring)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Latest-blue?style=flat-square&logo=postgresql)
-![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
+![MySQL](https://img.shields.io/badge/MySQL-Latest-%234479A1?style=flat-square&logo=mysql&logoColor=white)
 
 ---
 

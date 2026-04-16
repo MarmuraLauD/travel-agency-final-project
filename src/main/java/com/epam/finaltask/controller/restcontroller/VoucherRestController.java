@@ -95,6 +95,10 @@ public class VoucherRestController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id,asc") String[] sort,
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String tourType,
+            @RequestParam(required = false) String transferType,
+            @RequestParam(required = false) String hotelType,
             @RequestParam(defaultValue = "false") boolean hotOnly) {
 
         Sort.Direction direction = sort[1].equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
@@ -102,7 +106,17 @@ public class VoucherRestController {
 
         Page<VoucherDTO> pageTours;
 
-        if ("ALL".equals(status)) {
+        // Check if we have any filters (search or type filters)
+        boolean hasFilters = (search != null && !search.trim().isEmpty()) ||
+                (tourType != null && !tourType.equals("ALL")) ||
+                (transferType != null && !transferType.equals("ALL")) ||
+                (hotelType != null && !hotelType.equals("ALL"));
+
+        if (hasFilters) {
+            String filterStatus = (status == null || "ALL".equals(status)) ? null : status;
+            Boolean hotFilter = hotOnly ? true : null;
+            pageTours = voucherService.searchWithFilters(search, tourType, transferType, hotelType, hotFilter, filterStatus, pageable);
+        } else if ("ALL".equals(status)) {
             if (hotOnly) {
                 pageTours = voucherService.findAllByHot(pageable);
             } else {
