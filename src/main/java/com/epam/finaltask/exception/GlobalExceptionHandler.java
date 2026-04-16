@@ -23,21 +23,42 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(DuplicateRequestException.class)
-    public ResponseEntity<String> handleDuplicateRequestException(DuplicateRequestException e) {
+    public ResponseEntity<ErrorResponse> handleDuplicateRequestException(DuplicateRequestException e, HttpServletRequest request) {
         log.warn("Duplicate request: {}", e.getMessage());
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        ErrorResponse error = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.CONFLICT.value())
+                .error("Duplicate Request")
+                .message(e.getMessage())
+                .path(request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<String> handleNoSuchObjectException(EntityNotFoundException e) {
+    public ResponseEntity<ErrorResponse> handleNoSuchObjectException(EntityNotFoundException e, HttpServletRequest request) {
         log.error("Entity not found: {}", e.getMessage());
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        ErrorResponse error = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.NOT_FOUND.value())
+                .error("Resource Not Found")
+                .message(e.getMessage())
+                .path(request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(InsufficientFundsException.class)
-    public ResponseEntity<String> handleInsufficientFundsException(InsufficientFundsException e) {
+    public ResponseEntity<ErrorResponse> handleInsufficientFundsException(InsufficientFundsException e, HttpServletRequest request) {
         log.warn("Insufficient funds attempt. User is short by: {}", e.getAmount());
-        return new ResponseEntity<>("Insufficient funds! You are short by: " + e.getAmount(), HttpStatus.FORBIDDEN);
+        ErrorResponse error = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Insufficient Funds")
+                .message("Insufficient funds! You are short by: " + e.getAmount())
+                .path(request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(BadCredentialsException.class)

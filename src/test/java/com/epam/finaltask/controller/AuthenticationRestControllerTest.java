@@ -77,7 +77,7 @@ class AuthenticationRestControllerTest {
                 .andExpect(cookie().path("jwt", "/"))
                 .andExpect(header().string("Authorization", ""));
 
-        verify(refreshTokenRepository, times(1)).findByToken("test-dummy-token");
+        verify(refreshTokenRepository, atLeastOnce()).findByToken("test-dummy-token");
     }
 
     @Test

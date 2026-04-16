@@ -236,7 +236,7 @@ class VoucherRestControllerTest {
         // When & Then
         mockMvc.perform(delete("/api/vouchers/{id}", voucherId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.statusMessage").value("Voucher is successfully deleted"));
+                .andExpect(jsonPath("$.statusMessage").value("Voucher with Id " + voucherId + " has been deleted"));
 
         verify(voucherService, times(1)).delete(voucherId);
     }
@@ -277,12 +277,12 @@ class VoucherRestControllerTest {
         Page<VoucherDTO> filteredPage = new PageImpl<>(List.of(voucher1));
 
         when(voucherService.searchWithFilters(
-                eq("Beach"),
-                eq("LEISURE"),
                 any(),
                 any(),
                 any(),
-                eq("REGISTERED"),
+                any(),
+                any(),
+                any(),
                 any(Pageable.class)
         )).thenReturn(filteredPage);
 

@@ -103,7 +103,7 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    @WithMockUser(username = "admin", authorities = {"user:create"})
+    @WithMockUser(username = "admin", authorities = {"voucher:create"})
     void handleDuplicateRequestException_ReturnsConflict() throws Exception {
         // Given
         when(voucherService.create(any(VoucherDTO.class)))
@@ -132,7 +132,7 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    @WithMockUser(username = "user", authorities = {"voucher:read"})
+    @WithMockUser(username = "user", authorities = {"voucher:read", "voucher:update"})
     void handleEntityNotFoundException_ReturnsNotFound() throws Exception {
         // Given
         String nonExistentId = UUID.randomUUID().toString();
@@ -173,6 +173,7 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    @WithMockUser
     void handleNoHandlerFoundException_ReturnsNotFound() throws Exception {
         // Given - Request to non-existent API endpoint
         // When & Then

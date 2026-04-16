@@ -112,7 +112,7 @@ class MapperTests {
         assertTrue(voucherDTO.getHot());
         assertEquals(LocalDate.of(2025, 6, 15), voucherDTO.getArrivalDate());
         assertEquals(LocalDate.of(2025, 6, 22), voucherDTO.getEvictionDate());
-        assertEquals(userId.toString(), voucherDTO.getUserId());
+        assertEquals(userId, voucherDTO.getUserId());
     }
 
     @Test

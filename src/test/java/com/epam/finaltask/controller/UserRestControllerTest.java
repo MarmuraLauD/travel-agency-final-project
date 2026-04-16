@@ -74,6 +74,10 @@ class UserRestControllerTest {
         UserDTO userDTO = new UserDTO();
         userDTO.setUsername("existinguser");
         userDTO.setPassword("password123");
+        userDTO.setPhoneNumber("+380123456789");
+        userDTO.setRole("USER");
+        userDTO.setBalance(0.0);
+        userDTO.setActive(true);
 
         when(userService.createUser(any(UserDTO.class)))
                 .thenThrow(new com.epam.finaltask.exception.DuplicateRequestException("Username is already in use"));
