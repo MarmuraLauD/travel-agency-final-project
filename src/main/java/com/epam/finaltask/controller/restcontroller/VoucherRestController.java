@@ -67,7 +67,7 @@ public class VoucherRestController {
 
         Map<String, String> response = new HashMap<>();
         response.put("statusCode", "OK");
-        response.put("statusMessage", "Voucher status changed");
+        response.put("statusMessage", "Voucher hot status is successfully updated");
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 

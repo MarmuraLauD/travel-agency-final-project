@@ -1,6 +1,7 @@
 package com.epam.finaltask.service.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -49,11 +50,19 @@ public class JwtService {
         return extractAllClaims(token).getSubject();
     }
     private boolean isTokenExpired(String token) {
-        return extractAllClaims(token).getExpiration().before(new Date());
+        try {
+            return extractAllClaims(token).getExpiration().before(new Date());
+        } catch (ExpiredJwtException e) {
+            return true;
+        }
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        return !isTokenExpired(token) && userDetails.getUsername().equals(extractUsername(token));
+        try {
+            return !isTokenExpired(token) && userDetails.getUsername().equals(extractUsername(token));
+        } catch (ExpiredJwtException e) {
+            return false;
+        }
     }
 
     public int getMaxAgeSeconds() {

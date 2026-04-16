@@ -51,10 +51,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (jwt == null) {
-            RefreshToken refreshToken = refreshTokenRepository.findByToken(refreshJwt)
-                    .orElseThrow(() -> new EntityNotFoundException("Refresh token not found"));
-            if (!refreshTokenService.isExpired(refreshToken)) {
+        if (jwt == null && refreshJwt != null) {
+            RefreshToken refreshToken = refreshTokenRepository.findByToken(refreshJwt).orElse(null);
+            if (refreshToken != null && !refreshTokenService.isExpired(refreshToken)) {
                 UserDetails userDetails = refreshToken.getUser();
                 jwt = jwtService.generateToken(userDetails);
                 Cookie newJwtCookie = new Cookie("jwt", jwt);
@@ -65,15 +64,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-        UserDetails userDetails = userMapper.toUser(userService.getUserByUsername(jwtService.extractUsername(jwt)));
-        if (userDetails != null && jwtService.isTokenValid(jwt, userDetails)) {
-            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    userDetails,
-                    null,
-                    userDetails.getAuthorities()
-            );
-            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authToken);
+        if (jwt != null) {
+            try {
+                String username = jwtService.extractUsername(jwt);
+                UserDetails userDetails = userMapper.toUser(userService.getUserByUsername(username));
+                if (userDetails != null && jwtService.isTokenValid(jwt, userDetails)) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+            } catch (Exception ignored) {
+
+            }
         }
         filterChain.doFilter(request, response);
     }
