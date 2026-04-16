@@ -50,7 +50,7 @@ class VoucherRestControllerTest {
 
         Page<VoucherDTO> page = new PageImpl<>(List.of(voucher));
 
-        when(voucherService.searchWithFilters(any(), any(), any(), any(), any(), any(), any(Pageable.class)))
+        when(voucherService.findAllByStatus(any(), any(Pageable.class)))
                 .thenReturn(page);
 
         // When & Then
@@ -163,6 +163,8 @@ class VoucherRestControllerTest {
         voucherDTO.setTourType("LEISURE");
         voucherDTO.setTransferType("PLANE");
         voucherDTO.setHotelType("FIVE_STARS");
+        voucherDTO.setStatus("REGISTERED");
+        voucherDTO.setHot(false);
 
         VoucherDTO createdVoucher = new VoucherDTO();
         createdVoucher.setId(UUID.randomUUID().toString());
@@ -175,7 +177,7 @@ class VoucherRestControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(voucherDTO)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.message").value("Voucher created successfully"));
+                .andExpect(jsonPath("$.statusMessage").value("Voucher is successfully created"));
     }
 
     @Test
@@ -206,6 +208,8 @@ class VoucherRestControllerTest {
         updateDTO.setTourType("SAFARI");
         updateDTO.setTransferType("JEEPS");
         updateDTO.setHotelType("FOUR_STARS");
+        updateDTO.setStatus("REGISTERED");
+        updateDTO.setHot(false);
 
         VoucherDTO updatedVoucher = new VoucherDTO();
         updatedVoucher.setId(voucherId);
@@ -218,7 +222,7 @@ class VoucherRestControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateDTO)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("Voucher updated successfully"));
+                .andExpect(jsonPath("$.statusMessage").value("Voucher is successfully updated"));
     }
 
     @Test
@@ -232,7 +236,7 @@ class VoucherRestControllerTest {
         // When & Then
         mockMvc.perform(delete("/api/vouchers/{id}", voucherId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("Voucher deleted successfully"));
+                .andExpect(jsonPath("$.statusMessage").value("Voucher is successfully deleted"));
 
         verify(voucherService, times(1)).delete(voucherId);
     }
@@ -251,7 +255,7 @@ class VoucherRestControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"hot\": true}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("Voucher hot status updated successfully"));
+                .andExpect(jsonPath("$.statusMessage").value("Voucher hot status is successfully updated"));
 
         verify(voucherService, times(1)).changeHotStatus(voucherId, newHotStatus);
     }

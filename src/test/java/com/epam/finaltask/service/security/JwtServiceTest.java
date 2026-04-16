@@ -108,7 +108,7 @@ class JwtServiceTest {
         JwtService shortExpirationService = new JwtService();
         ReflectionTestUtils.setField(shortExpirationService, "jwtSigningKey",
                 "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970");
-        ReflectionTestUtils.setField(shortExpirationService, "jwtExpiration", 1L); // 1ms
+        ReflectionTestUtils.setField(shortExpirationService, "jwtExpiration", 100L); // 100ms
 
         UserDetails userDetails = User.builder()
                 .username("testuser")
@@ -118,8 +118,8 @@ class JwtServiceTest {
 
         String token = shortExpirationService.generateToken(userDetails);
 
-        // Wait for token to expire
-        Thread.sleep(10);
+        // Wait for token to expire (wait longer than expiration time)
+        Thread.sleep(500);
 
         // When
         boolean isValid = shortExpirationService.isTokenValid(token, userDetails);

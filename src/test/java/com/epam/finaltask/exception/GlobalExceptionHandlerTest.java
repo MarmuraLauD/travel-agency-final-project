@@ -116,7 +116,9 @@ class GlobalExceptionHandlerTest {
                     "price": 500.0,
                     "tourType": "LEISURE",
                     "transferType": "BUS",
-                    "hotelType": "THREE_STARS"
+                    "hotelType": "THREE_STARS",
+                    "status": "REGISTERED",
+                    "hot": false
                 }
                 """;
 
@@ -145,7 +147,9 @@ class GlobalExceptionHandlerTest {
                     "price": 1000.0,
                     "tourType": "SAFARI",
                     "transferType": "JEEPS",
-                    "hotelType": "FOUR_STARS"
+                    "hotelType": "FOUR_STARS",
+                    "status": "REGISTERED",
+                    "hot": false
                 }
                 """;
 
