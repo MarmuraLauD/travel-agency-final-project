@@ -26,15 +26,15 @@
     }
     .sort-link {
       text-decoration: none;
-      color: white !important;
+      color: #ffffff !important;
       display: flex;
       align-items: center;
       gap: 5px;
       font-weight: 500;
     }
     .sort-link:hover {
-      color: #f0f0f0 !important;
-      opacity: 0.95;
+      color: #e0e0e0 !important;
+      text-decoration: underline;
     }
     .description-cell {
       max-width: 250px;
@@ -43,8 +43,17 @@
       text-overflow: ellipsis;
     }
     .table thead {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    }
+    .table thead th {
+      color: #ffffff !important;
+      background: transparent !important;
+    }
+    .table thead th a {
+      color: #ffffff !important;
+    }
+    .table thead th span {
+      color: #ffffff !important;
     }
     .table-hot-row {
       background-color: #fef5e7 !important;
@@ -233,13 +242,13 @@
           </td>
           <td class="description-cell" th:attr="title=${voucher.description}" th:text="${voucher.description}"></td>
           <td>
-            <span class="badge" style="background: #e2e8f0; color: #4a5568;" th:text="${voucher.tourType}"></span>
+            <span class="badge" style="background: #e2e8f0; color: #4a5568;" th:text="#{|enum.tour.${#strings.toLowerCase(voucher.tourType)}|}"></span>
           </td>
           <td>
-            <i class="bi bi-truck me-1 text-muted"></i><span th:text="${voucher.transferType}"></span>
+            <i class="bi bi-truck me-1 text-muted"></i><span th:text="#{|enum.trans.${#strings.toLowerCase(voucher.transferType == 'PRIVATE_CAR' ? 'private' : voucher.transferType == 'ELECTRICAL_CARS' ? 'electric' : voucher.transferType)}|}"></span>
           </td>
           <td>
-            <i class="bi bi-building me-1 text-muted"></i><span th:text="${voucher.hotelType}"></span>
+            <i class="bi bi-building me-1 text-muted"></i><span th:text="#{|enum.hotel.${voucher.hotelType == 'ONE_STAR' ? '1star' : voucher.hotelType == 'TWO_STARS' ? '2star' : voucher.hotelType == 'THREE_STARS' ? '3star' : voucher.hotelType == 'FOUR_STARS' ? '4star' : '5star'}|}"></span>
           </td>
           <td class="fw-bold" style="color: #667eea;" th:text="'$' + ${#numbers.formatDecimal(voucher.price, 1, 2)}"></td>
           <td class="text-center">

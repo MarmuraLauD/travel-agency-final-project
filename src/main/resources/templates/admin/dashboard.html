@@ -20,17 +20,17 @@
         .nav-pills .nav-link {
             border-radius: 10px;
             padding: 0.75rem 1.5rem;
-            color: #4a5568; !important;
+            color: #4a5568 !important;
             font-weight: 500;
             transition: all 0.2s;
         }
         .nav-pills .nav-link:hover {
-            background: #f7fafc; !important;
+            background: #f7fafc !important;
             color: #667eea !important;
         }
         .nav-pills .nav-link.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); !important;
-            color: #ffffff; !important;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: #ffffff !important;
         }
         .sort-header {
             cursor: pointer;
@@ -130,7 +130,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
+<script th:inline="javascript">
     let currentVouchers = [];
     let currentUsers = [];
     let vSort = { field: 'id', dir: 'asc' };
@@ -143,6 +143,47 @@
 
     const canDeleteV = document.body.getAttribute('data-can-delete-v') === 'true';
     const canDeleteU = document.body.getAttribute('data-can-delete-u') === 'true';
+
+    // Localization maps
+    const tourTypeMap = {
+        'HEALTH': [[#{enum.tour.health}]],
+        'SPORTS': [[#{enum.tour.sports}]],
+        'LEISURE': [[#{enum.tour.leisure}]],
+        'SAFARI': [[#{enum.tour.safari}]],
+        'WINE': [[#{enum.tour.wine}]],
+        'ECO': [[#{enum.tour.eco}]],
+        'ADVENTURE': [[#{enum.tour.adventure}]],
+        'CULTURAL': [[#{enum.tour.cultural}]]
+    };
+
+    const transferTypeMap = {
+        'BUS': [[#{enum.trans.bus}]],
+        'TRAIN': [[#{enum.trans.train}]],
+        'PLANE': [[#{enum.trans.plane}]],
+        'SHIP': [[#{enum.trans.ship}]],
+        'PRIVATE_CAR': [[#{enum.trans.private}]],
+        'JEEPS': [[#{enum.trans.jeeps}]],
+        'MINIBUS': [[#{enum.trans.minibus}]],
+        'ELECTRICAL_CARS': [[#{enum.trans.electric}]]
+    };
+
+    const hotelTypeMap = {
+        'ONE_STAR': [[#{enum.hotel.1star}]],
+        'TWO_STARS': [[#{enum.hotel.2star}]],
+        'THREE_STARS': [[#{enum.hotel.3star}]],
+        'FOUR_STARS': [[#{enum.hotel.4star}]],
+        'FIVE_STARS': [[#{enum.hotel.5star}]]
+    };
+
+    const statusMap = {
+        'REGISTERED': [[#{enum.status.registered}]],
+        'PENDING': [[#{enum.status.pending}]],
+        'CONFIRMED': [[#{enum.status.confirmed}]]
+    };
+
+    function formatEnum(value, map) {
+        return map[value] || value;
+    }
 
     document.addEventListener("DOMContentLoaded", () => {
         loadVouchers();
@@ -212,9 +253,14 @@
         const params = new URLSearchParams({
             page: vPage.current,
             size: vPage.size,
-            status: vFilters.status,
             sort: `${vSort.field},${vSort.dir}`
         });
+
+        if (vFilters.status && vFilters.status !== 'ALL') {
+            params.append('status', vFilters.status);
+        } else {
+            params.append('status', 'ALL');
+        }
 
         if (vFilters.search) {
             params.append('search', vFilters.search);
@@ -232,16 +278,16 @@
             params.append('hotelType', vFilters.hotelType);
         }
 
+        console.log('Loading vouchers with params:', params.toString());
+        console.log('Filters:', vFilters);
+
         fetch(`/api/vouchers?${params}`)
             .then(res => res.json())
             .then(data => {
-                console.log('Vouchers API response:', data);
                 currentVouchers = data.vouchers || [];
                 vPage.total = data.totalElements || 0;
                 vPage.totalPages = data.totalPages || 0;
                 vPage.current = data.currentPage || 0;
-                console.log('vPage after update:', vPage);
-                console.log('currentVouchers count:', currentVouchers.length);
                 renderVouchers();
                 renderVoucherPagination();
             });
@@ -264,15 +310,19 @@
 
         list.innerHTML = currentVouchers.map(v => {
             const isHot = v.hot === true || String(v.hot) === 'true';
+            const tourTypeText = formatEnum(v.tourType, tourTypeMap);
+            const transferTypeText = formatEnum(v.transferType, transferTypeMap);
+            const hotelTypeText = formatEnum(v.hotelType, hotelTypeMap);
+            const statusText = formatEnum(v.status, statusMap);
 
             return `
                 <tr>
                     <td class="fw-semibold" style="color: #2d3748;">${v.title}</td>
-                    <td><span class="badge" style="background: #e2e8f0; color: #4a5568;">${v.tourType}</span></td>
-                    <td><span class="badge" style="background: #fef3c7; color: #92400e;">${v.transferType}</span></td>
-                    <td><span class="badge" style="background: #dbeafe; color: #1e40af;">${v.hotelType}</span></td>
+                    <td><span class="badge" style="background: #e2e8f0; color: #4a5568;">${tourTypeText}</span></td>
+                    <td><span class="badge" style="background: #fef3c7; color: #92400e;">${transferTypeText}</span></td>
+                    <td><span class="badge" style="background: #dbeafe; color: #1e40af;">${hotelTypeText}</span></td>
                     <td style="color: #667eea; font-weight: 600;">$${v.price.toFixed(2)}</td>
-                    <td><span class="badge" style="background: #bee3f8; color: #2c5aa0;">${v.status}</span></td>
+                    <td><span class="badge" style="background: #bee3f8; color: #2c5aa0;">${statusText}</span></td>
                     <td>
                         <button class="btn btn-sm btn-action ${isHot ? 'btn-hot' : 'btn-hot-off'} me-1"
                                 onclick="toggleHotStatus('${v.id}')">
@@ -286,25 +336,9 @@
     }
 
     function renderVoucherPagination() {
-        const infoEl = document.getElementById('voucher-page-info');
         const paginationEl = document.getElementById('voucher-pagination');
 
-        if (!infoEl || !paginationEl) return;
-
-        console.log('renderVoucherPagination - vPage.total:', vPage.total, 'currentVouchers.length:', currentVouchers.length);
-
-        if (vPage.total === 0 && currentVouchers.length === 0) {
-            console.log('No data, showing 0');
-            infoEl.textContent = '0';
-            paginationEl.innerHTML = '';
-            return;
-        }
-
-        const start = vPage.current * vPage.size + 1;
-        const end = Math.min((vPage.current + 1) * vPage.size, vPage.total);
-        const text = `${start}-${end} of ${vPage.total}`;
-        console.log('Pagination text:', text);
-        infoEl.textContent = text;
+        if (!paginationEl) return;
 
         if (vPage.totalPages <= 1) {
             paginationEl.innerHTML = '';
@@ -456,14 +490,9 @@
     }
 
     function renderUserPagination() {
-        const infoEl = document.getElementById('user-page-info');
         const paginationEl = document.getElementById('user-pagination');
 
-        if (!infoEl || !paginationEl) return;
-
-        const start = uPage.current * uPage.size + 1;
-        const end = Math.min((uPage.current + 1) * uPage.size, uPage.total);
-        infoEl.textContent = uPage.total > 0 ? `${start}-${end} of ${uPage.total}` : '0';
+        if (!paginationEl) return;
 
         if (uPage.totalPages <= 1) {
             paginationEl.innerHTML = '';
