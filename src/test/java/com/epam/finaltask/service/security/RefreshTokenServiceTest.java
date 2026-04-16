@@ -139,28 +139,6 @@ class RefreshTokenServiceTest {
         assertFalse(result);
     }
 
-    // NOTE: This test is disabled because RefreshTokenRepository.deleteByUser() has a problematic signature
-    // It returns Optional<Void> which cannot be properly mocked (cannot create Optional.of(null))
-    // The repository method should either return void or be refactored to return Optional<Integer> for affected rows
-    // TODO: Refactor RefreshTokenRepository.deleteByUser() signature
-    // @Test
-    // void deleteByUserId_ExistingUser_Success() {
-    //     // Given
-    //     UUID userId = UUID.randomUUID();
-    //
-    //     User user = new User();
-    //     user.setId(userId);
-    //
-    //     when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-    //     // Cannot properly mock Optional<Void> - this is a design issue
-    //
-    //     // When
-    //     refreshTokenService.deleteByUserId(userId);
-    //
-    //     // Then
-    //     verify(userRepository, times(1)).findById(userId);
-    //     verify(refreshTokenRepository, times(1)).deleteByUser(user);
-    // }
 
     @Test
     void deleteByUserId_UserNotFound_ThrowsException() {
