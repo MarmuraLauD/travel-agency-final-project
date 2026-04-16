@@ -106,11 +106,11 @@ public class VoucherRestController {
 
         Page<VoucherDTO> pageTours;
 
-        // Check if we have any filters (search or type filters)
         boolean hasFilters = (search != null && !search.trim().isEmpty()) ||
                 (tourType != null && !tourType.equals("ALL")) ||
                 (transferType != null && !transferType.equals("ALL")) ||
-                (hotelType != null && !hotelType.equals("ALL"));
+                (hotelType != null && !hotelType.equals("ALL")) ||
+                (status != null && !status.equals("ALL"));
 
         if (hasFilters) {
             String filterStatus = (status == null || "ALL".equals(status)) ? null : status;
